@@ -54,7 +54,6 @@ export default function ProductsPage() {
   const fetchCategories = async () => {
     try {
       const res = await api.get('/categories');
-
       setCategories(res.data);
     } catch (error) {
       console.log(error);
@@ -113,7 +112,7 @@ export default function ProductsPage() {
 
       alert(
         error.response?.data?.message ||
-          'Failed to add product'
+          'Failed to add product',
       );
     } finally {
       setAdding(false);
@@ -141,7 +140,7 @@ export default function ProductsPage() {
 
       alert(
         error.response?.data?.message ||
-          'Failed to delete product'
+          'Failed to delete product',
       );
     } finally {
       setDeletingId('');
@@ -193,7 +192,7 @@ export default function ProductsPage() {
 
       alert(
         error.response?.data?.message ||
-          'Failed to update product'
+          'Failed to update product',
       );
     }
   };
@@ -208,7 +207,7 @@ export default function ProductsPage() {
           justifyContent: 'center',
           alignItems: 'center',
           background: '#f4f7fb',
-          fontSize: '20px',
+          fontSize: '22px',
           fontWeight: 'bold',
           color: '#2563eb',
         }}
@@ -222,25 +221,29 @@ export default function ProductsPage() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#f4f7fb',
-        padding: '30px',
+        background:
+          'linear-gradient(to right, #eef2ff, #f8fafc)',
+        padding: '40px',
+        fontFamily: 'sans-serif',
       }}
     >
       {/* Header */}
       <div
         style={{
           background: '#ffffff',
-          padding: '20px',
-          borderRadius: '16px',
-          boxShadow: '0 5px 20px rgba(0,0,0,0.05)',
-          marginBottom: '25px',
+          padding: '30px',
+          borderRadius: '24px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+          marginBottom: '30px',
+          border: '1px solid #e5e7eb',
         }}
       >
         <h1
           style={{
             margin: 0,
             color: '#111827',
-            fontSize: '30px',
+            fontSize: '36px',
+            fontWeight: 'bold',
           }}
         >
           Products Management
@@ -248,23 +251,25 @@ export default function ProductsPage() {
 
         <p
           style={{
-            marginTop: '10px',
+            marginTop: '12px',
             color: '#6b7280',
+            fontSize: '16px',
           }}
         >
-          Add, edit and delete products
+          Add, edit and manage your products easily
         </p>
       </div>
 
-      {/* Add Product */}
+      {/* Add Product Card */}
       <div
         style={{
           background: '#ffffff',
-          padding: '25px',
-          borderRadius: '16px',
-          boxShadow: '0 5px 20px rgba(0,0,0,0.05)',
-          marginBottom: '30px',
-          maxWidth: '500px',
+          padding: '30px',
+          borderRadius: '24px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+          marginBottom: '35px',
+          maxWidth: '550px',
+          border: '1px solid #e5e7eb',
         }}
       >
         <h2
@@ -277,6 +282,7 @@ export default function ProductsPage() {
           Add New Product
         </h2>
 
+        {/* Name */}
         <input
           type="text"
           placeholder="Product Name"
@@ -284,17 +290,19 @@ export default function ProductsPage() {
           onChange={(e) => setName(e.target.value)}
           style={{
             width: '100%',
-            padding: '12px',
-            marginBottom: '15px',
-            borderRadius: '10px',
+            padding: '14px',
+            marginBottom: '16px',
+            borderRadius: '14px',
             border: '1px solid #d1d5db',
             fontSize: '15px',
             color: '#111827',
             backgroundColor: '#ffffff',
             boxSizing: 'border-box',
+            outline: 'none',
           }}
         />
 
+        {/* Price */}
         <input
           type="number"
           placeholder="Product Price"
@@ -302,30 +310,33 @@ export default function ProductsPage() {
           onChange={(e) => setPrice(e.target.value)}
           style={{
             width: '100%',
-            padding: '12px',
-            marginBottom: '15px',
-            borderRadius: '10px',
+            padding: '14px',
+            marginBottom: '16px',
+            borderRadius: '14px',
             border: '1px solid #d1d5db',
             fontSize: '15px',
             color: '#111827',
             backgroundColor: '#ffffff',
             boxSizing: 'border-box',
+            outline: 'none',
           }}
         />
 
+        {/* Category */}
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           style={{
             width: '100%',
-            padding: '12px',
+            padding: '14px',
             marginBottom: '20px',
-            borderRadius: '10px',
+            borderRadius: '14px',
             border: '1px solid #d1d5db',
             fontSize: '15px',
             color: '#111827',
             backgroundColor: '#ffffff',
             boxSizing: 'border-box',
+            outline: 'none',
           }}
         >
           <option value="">Select Category</option>
@@ -337,33 +348,38 @@ export default function ProductsPage() {
           ))}
         </select>
 
+        {/* Add Button */}
         <button
           onClick={addProduct}
           disabled={adding}
           style={{
             width: '100%',
-            padding: '13px',
+            padding: '15px',
             border: 'none',
-            borderRadius: '10px',
+            borderRadius: '14px',
             background: adding ? '#93c5fd' : '#2563eb',
             color: '#ffffff',
             fontSize: '16px',
-            fontWeight: 600,
+            fontWeight: 700,
             cursor: adding ? 'not-allowed' : 'pointer',
+            transition: '0.3s',
+            boxShadow:
+              '0 6px 18px rgba(37,99,235,0.3)',
           }}
         >
           {adding ? 'Adding Product...' : 'Add Product'}
         </button>
       </div>
 
-      {/* Products Table */}
+      {/* Product Table */}
       <div
         style={{
           background: '#ffffff',
-          padding: '20px',
-          borderRadius: '16px',
-          boxShadow: '0 5px 20px rgba(0,0,0,0.05)',
+          padding: '25px',
+          borderRadius: '24px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
           overflowX: 'auto',
+          border: '1px solid #e5e7eb',
         }}
       >
         <h2
@@ -384,22 +400,50 @@ export default function ProductsPage() {
           <thead>
             <tr
               style={{
-                background: '#f3f4f6',
+                background: '#eff6ff',
               }}
             >
-              <th style={{ padding: '14px', textAlign: 'left' }}>
+              <th
+                style={{
+                  padding: '18px',
+                  textAlign: 'left',
+                  color: '#1e3a8a',
+                  fontWeight: 'bold',
+                }}
+              >
                 Name
               </th>
 
-              <th style={{ padding: '14px', textAlign: 'left' }}>
+              <th
+                style={{
+                  padding: '18px',
+                  textAlign: 'left',
+                  color: '#1e3a8a',
+                  fontWeight: 'bold',
+                }}
+              >
                 Price
               </th>
 
-              <th style={{ padding: '14px', textAlign: 'left' }}>
+              <th
+                style={{
+                  padding: '18px',
+                  textAlign: 'left',
+                  color: '#1e3a8a',
+                  fontWeight: 'bold',
+                }}
+              >
                 Category
               </th>
 
-              <th style={{ padding: '14px', textAlign: 'left' }}>
+              <th
+                style={{
+                  padding: '18px',
+                  textAlign: 'left',
+                  color: '#1e3a8a',
+                  fontWeight: 'bold',
+                }}
+              >
                 Action
               </th>
             </tr>
@@ -411,7 +455,7 @@ export default function ProductsPage() {
                 <td
                   colSpan={4}
                   style={{
-                    padding: '20px',
+                    padding: '25px',
                     textAlign: 'center',
                     color: '#6b7280',
                   }}
@@ -424,11 +468,17 @@ export default function ProductsPage() {
                 <tr
                   key={p._id}
                   style={{
-                    borderBottom: '1px solid #e5e7eb',
+                    borderBottom:
+                      '1px solid #f1f5f9',
                   }}
                 >
                   {/* Name */}
-                  <td style={{ padding: '14px' }}>
+                  <td
+                    style={{
+                      padding: '18px',
+                      color: '#111827',
+                    }}
+                  >
                     {editingId === p._id ? (
                       <input
                         value={editName}
@@ -436,10 +486,11 @@ export default function ProductsPage() {
                           setEditName(e.target.value)
                         }
                         style={{
-                          padding: '8px',
+                          padding: '10px',
                           width: '100%',
-                          borderRadius: '8px',
-                          border: '1px solid #d1d5db',
+                          borderRadius: '10px',
+                          border:
+                            '1px solid #d1d5db',
                           color: '#111827',
                         }}
                       />
@@ -449,19 +500,27 @@ export default function ProductsPage() {
                   </td>
 
                   {/* Price */}
-                  <td style={{ padding: '14px' }}>
+                  <td
+                    style={{
+                      padding: '18px',
+                      color: '#111827',
+                    }}
+                  >
                     {editingId === p._id ? (
                       <input
                         type="number"
                         value={editPrice}
                         onChange={(e) =>
-                          setEditPrice(e.target.value)
+                          setEditPrice(
+                            e.target.value,
+                          )
                         }
                         style={{
-                          padding: '8px',
+                          padding: '10px',
                           width: '100%',
-                          borderRadius: '8px',
-                          border: '1px solid #d1d5db',
+                          borderRadius: '10px',
+                          border:
+                            '1px solid #d1d5db',
                           color: '#111827',
                         }}
                       />
@@ -471,18 +530,26 @@ export default function ProductsPage() {
                   </td>
 
                   {/* Category */}
-                  <td style={{ padding: '14px' }}>
+                  <td
+                    style={{
+                      padding: '18px',
+                      color: '#111827',
+                    }}
+                  >
                     {editingId === p._id ? (
                       <select
                         value={editCategory}
                         onChange={(e) =>
-                          setEditCategory(e.target.value)
+                          setEditCategory(
+                            e.target.value,
+                          )
                         }
                         style={{
-                          padding: '8px',
+                          padding: '10px',
                           width: '100%',
-                          borderRadius: '8px',
-                          border: '1px solid #d1d5db',
+                          borderRadius: '10px',
+                          border:
+                            '1px solid #d1d5db',
                           color: '#111827',
                         }}
                       >
@@ -500,43 +567,48 @@ export default function ProductsPage() {
                         ))}
                       </select>
                     ) : (
-                      p.category?.name || 'No Category'
+                      p.category?.name ||
+                      'No Category'
                     )}
                   </td>
 
-                  {/* Actions */}
+                  {/* Action */}
                   <td
                     style={{
-                      padding: '14px',
+                      padding: '18px',
                       display: 'flex',
                       gap: '10px',
                     }}
                   >
                     {editingId === p._id ? (
                       <>
+                        {/* Save */}
                         <button
                           onClick={updateProduct}
                           style={{
-                            padding: '8px 14px',
+                            padding: '9px 16px',
                             border: 'none',
-                            borderRadius: '8px',
+                            borderRadius: '10px',
                             background: '#16a34a',
                             color: '#ffffff',
                             cursor: 'pointer',
                             fontWeight: 600,
+                            boxShadow:
+                              '0 4px 12px rgba(22,163,74,0.25)',
                           }}
                         >
                           Save
                         </button>
 
+                        {/* Cancel */}
                         <button
                           onClick={() =>
                             setEditingId('')
                           }
                           style={{
-                            padding: '8px 14px',
+                            padding: '9px 16px',
                             border: 'none',
-                            borderRadius: '8px',
+                            borderRadius: '10px',
                             background: '#6b7280',
                             color: '#ffffff',
                             cursor: 'pointer',
@@ -548,30 +620,38 @@ export default function ProductsPage() {
                       </>
                     ) : (
                       <>
+                        {/* Edit */}
                         <button
-                          onClick={() => startEdit(p)}
+                          onClick={() =>
+                            startEdit(p)
+                          }
                           style={{
-                            padding: '8px 14px',
+                            padding: '9px 16px',
                             border: 'none',
-                            borderRadius: '8px',
+                            borderRadius: '10px',
                             background: '#2563eb',
                             color: '#ffffff',
                             cursor: 'pointer',
                             fontWeight: 600,
+                            boxShadow:
+                              '0 4px 12px rgba(37,99,235,0.25)',
                           }}
                         >
                           Edit
                         </button>
 
+                        {/* Delete */}
                         <button
                           onClick={() =>
                             deleteProduct(p._id)
                           }
-                          disabled={deletingId === p._id}
+                          disabled={
+                            deletingId === p._id
+                          }
                           style={{
-                            padding: '8px 14px',
+                            padding: '9px 16px',
                             border: 'none',
-                            borderRadius: '8px',
+                            borderRadius: '10px',
                             background:
                               deletingId === p._id
                                 ? '#fca5a5'
@@ -582,6 +662,8 @@ export default function ProductsPage() {
                                 ? 'not-allowed'
                                 : 'pointer',
                             fontWeight: 600,
+                            boxShadow:
+                              '0 4px 12px rgba(220,38,38,0.25)',
                           }}
                         >
                           {deletingId === p._id
