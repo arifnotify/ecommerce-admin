@@ -18,17 +18,23 @@ export default function ProductsPage() {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
+  const [image, setImage] = useState('');
+
+  // Upload State
+  const [uploading, setUploading] = useState(false);
 
   // Edit Product State
   const [editingId, setEditingId] = useState('');
   const [editName, setEditName] = useState('');
   const [editPrice, setEditPrice] = useState('');
-  const [editCategory, setEditCategory] = useState('');
+  const [editCategory, setEditCategory] =
+    useState('');
 
   // Loading State
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
-  const [deletingId, setDeletingId] = useState('');
+  const [deletingId, setDeletingId] =
+    useState('');
 
   // Fetch Products
   const fetchProducts = async () => {
@@ -61,6 +67,32 @@ export default function ProductsPage() {
     }
   };
 
+  // Upload Image
+  const uploadImage = async (file: File) => {
+    try {
+      setUploading(true);
+
+      const formData = new FormData();
+
+      formData.append('file', file);
+
+      const res = await api.post(
+        '/upload',
+        formData,
+      );
+
+      setImage(res.data.url);
+
+      alert('Image Uploaded Successfully');
+    } catch (error: any) {
+      console.log(error.response?.data);
+
+      alert('Image upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // Load Data
   useEffect(() => {
     const token = Cookies.get('token');
@@ -76,7 +108,12 @@ export default function ProductsPage() {
 
   // Add Product
   const addProduct = async () => {
-    if (!name || !price || !category) {
+    if (
+      !name ||
+      !price ||
+      !category ||
+      !image
+    ) {
       alert('Please fill all fields');
       return;
     }
@@ -92,6 +129,7 @@ export default function ProductsPage() {
           name,
           price: Number(price),
           category,
+          image,
         },
         {
           headers: {
@@ -103,6 +141,7 @@ export default function ProductsPage() {
       setName('');
       setPrice('');
       setCategory('');
+      setImage('');
 
       await fetchProducts();
 
@@ -152,12 +191,18 @@ export default function ProductsPage() {
     setEditingId(product._id);
     setEditName(product.name);
     setEditPrice(product.price);
-    setEditCategory(product.category?._id || '');
+    setEditCategory(
+      product.category?._id || '',
+    );
   };
 
   // Update Product
   const updateProduct = async () => {
-    if (!editName || !editPrice || !editCategory) {
+    if (
+      !editName ||
+      !editPrice ||
+      !editCategory
+    ) {
       alert('Please fill all fields');
       return;
     }
@@ -233,9 +278,9 @@ export default function ProductsPage() {
           background: '#ffffff',
           padding: '30px',
           borderRadius: '24px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+          boxShadow:
+            '0 10px 30px rgba(0,0,0,0.08)',
           marginBottom: '30px',
-          border: '1px solid #e5e7eb',
         }}
       >
         <h1
@@ -248,16 +293,6 @@ export default function ProductsPage() {
         >
           Products Management
         </h1>
-
-        <p
-          style={{
-            marginTop: '12px',
-            color: '#6b7280',
-            fontSize: '16px',
-          }}
-        >
-          Add, edit and manage your products easily
-        </p>
       </div>
 
       {/* Add Product Card */}
@@ -266,10 +301,10 @@ export default function ProductsPage() {
           background: '#ffffff',
           padding: '30px',
           borderRadius: '24px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+          boxShadow:
+            '0 10px 30px rgba(0,0,0,0.08)',
           marginBottom: '35px',
           maxWidth: '550px',
-          border: '1px solid #e5e7eb',
         }}
       >
         <h2
@@ -287,7 +322,9 @@ export default function ProductsPage() {
           type="text"
           placeholder="Product Name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) =>
+            setName(e.target.value)
+          }
           style={{
             width: '100%',
             padding: '14px',
@@ -297,8 +334,6 @@ export default function ProductsPage() {
             fontSize: '15px',
             color: '#111827',
             backgroundColor: '#ffffff',
-            boxSizing: 'border-box',
-            outline: 'none',
           }}
         />
 
@@ -307,7 +342,9 @@ export default function ProductsPage() {
           type="number"
           placeholder="Product Price"
           value={price}
-          onChange={(e) => setPrice(e.target.value)}
+          onChange={(e) =>
+            setPrice(e.target.value)
+          }
           style={{
             width: '100%',
             padding: '14px',
@@ -317,29 +354,29 @@ export default function ProductsPage() {
             fontSize: '15px',
             color: '#111827',
             backgroundColor: '#ffffff',
-            boxSizing: 'border-box',
-            outline: 'none',
           }}
         />
 
         {/* Category */}
         <select
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          onChange={(e) =>
+            setCategory(e.target.value)
+          }
           style={{
             width: '100%',
             padding: '14px',
-            marginBottom: '20px',
+            marginBottom: '16px',
             borderRadius: '14px',
             border: '1px solid #d1d5db',
             fontSize: '15px',
             color: '#111827',
             backgroundColor: '#ffffff',
-            boxSizing: 'border-box',
-            outline: 'none',
           }}
         >
-          <option value="">Select Category</option>
+          <option value="">
+            Select Category
+          </option>
 
           {categories.map((c: any) => (
             <option key={c._id} value={c._id}>
@@ -348,40 +385,70 @@ export default function ProductsPage() {
           ))}
         </select>
 
+        {/* Upload Image */}
+        <input
+          type="file"
+          onChange={(e) => {
+            if (e.target.files) {
+              uploadImage(
+                e.target.files[0],
+              );
+            }
+          }}
+          style={{
+            marginBottom: '20px',
+            color: '#111827',
+          }}
+        />
+
+        {/* Preview */}
+        {image && (
+          <img
+            src={image}
+            alt="product"
+            style={{
+              width: '100%',
+              height: '220px',
+              objectFit: 'cover',
+              borderRadius: '16px',
+              marginBottom: '20px',
+              border: '1px solid #e5e7eb',
+            }}
+          />
+        )}
+
         {/* Add Button */}
         <button
           onClick={addProduct}
-          disabled={adding}
+          disabled={adding || uploading}
           style={{
             width: '100%',
             padding: '15px',
             border: 'none',
             borderRadius: '14px',
-            background: adding ? '#93c5fd' : '#2563eb',
+            background:
+              adding || uploading
+                ? '#93c5fd'
+                : '#2563eb',
             color: '#ffffff',
             fontSize: '16px',
             fontWeight: 700,
-            cursor: adding ? 'not-allowed' : 'pointer',
-            transition: '0.3s',
-            boxShadow:
-              '0 6px 18px rgba(37,99,235,0.3)',
+            cursor:
+              adding || uploading
+                ? 'not-allowed'
+                : 'pointer',
           }}
         >
-          {adding ? 'Adding Product...' : 'Add Product'}
+          {uploading
+            ? 'Uploading Image...'
+            : adding
+            ? 'Adding Product...'
+            : 'Add Product'}
         </button>
       </div>
 
-      {/* Product Table */}
-      <div
-        style={{
-          background: '#ffffff',
-          padding: '25px',
-          borderRadius: '24px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-          overflowX: 'auto',
-          border: '1px solid #e5e7eb',
-        }}
-      >
+      {/* Product List */}
+      <div>
         <h2
           style={{
             marginBottom: '20px',
@@ -391,293 +458,116 @@ export default function ProductsPage() {
           Product List
         </h2>
 
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-          }}
-        >
-          <thead>
-            <tr
+        {products.length === 0 ? (
+          <div
+            style={{
+              background: '#ffffff',
+              padding: '20px',
+              borderRadius: '14px',
+              color: '#6b7280',
+            }}
+          >
+            No products found
+          </div>
+        ) : (
+          products.map((p: any) => (
+            <div
+              key={p._id}
               style={{
-                background: '#eff6ff',
+                background: '#ffffff',
+                padding: '20px',
+                borderRadius: '18px',
+                marginBottom: '18px',
+                boxShadow:
+                  '0 5px 20px rgba(0,0,0,0.05)',
               }}
             >
-              <th
-                style={{
-                  padding: '18px',
-                  textAlign: 'left',
-                  color: '#1e3a8a',
-                  fontWeight: 'bold',
-                }}
-              >
-                Name
-              </th>
-
-              <th
-                style={{
-                  padding: '18px',
-                  textAlign: 'left',
-                  color: '#1e3a8a',
-                  fontWeight: 'bold',
-                }}
-              >
-                Price
-              </th>
-
-              <th
-                style={{
-                  padding: '18px',
-                  textAlign: 'left',
-                  color: '#1e3a8a',
-                  fontWeight: 'bold',
-                }}
-              >
-                Category
-              </th>
-
-              <th
-                style={{
-                  padding: '18px',
-                  textAlign: 'left',
-                  color: '#1e3a8a',
-                  fontWeight: 'bold',
-                }}
-              >
-                Action
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {products.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={4}
+              {/* Product Image */}
+              {p.image && (
+                <img
+                  src={p.image}
+                  alt={p.name}
                   style={{
-                    padding: '25px',
-                    textAlign: 'center',
-                    color: '#6b7280',
+                    width: '120px',
+                    height: '120px',
+                    objectFit: 'cover',
+                    borderRadius: '14px',
+                    marginBottom: '15px',
+                  }}
+                />
+              )}
+
+              <h3
+                style={{
+                  margin: 0,
+                  color: '#111827',
+                  marginBottom: '10px',
+                }}
+              >
+                {p.name}
+              </h3>
+
+              <p
+                style={{
+                  color: '#374151',
+                  marginBottom: '8px',
+                }}
+              >
+                Price: ৳ {p.price}
+              </p>
+
+              <p
+                style={{
+                  color: '#6b7280',
+                  marginBottom: '15px',
+                }}
+              >
+                Category:{' '}
+                {p.category?.name ||
+                  'No Category'}
+              </p>
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '10px',
+                }}
+              >
+                <button
+                  onClick={() =>
+                    startEdit(p)
+                  }
+                  style={{
+                    padding: '10px 18px',
+                    border: 'none',
+                    borderRadius: '10px',
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    cursor: 'pointer',
                   }}
                 >
-                  No products found
-                </td>
-              </tr>
-            ) : (
-              products.map((p: any) => (
-                <tr
-                  key={p._id}
+                  Edit
+                </button>
+
+                <button
+                  onClick={() =>
+                    deleteProduct(p._id)
+                  }
                   style={{
-                    borderBottom:
-                      '1px solid #f1f5f9',
+                    padding: '10px 18px',
+                    border: 'none',
+                    borderRadius: '10px',
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    cursor: 'pointer',
                   }}
                 >
-                  {/* Name */}
-                  <td
-                    style={{
-                      padding: '18px',
-                      color: '#111827',
-                    }}
-                  >
-                    {editingId === p._id ? (
-                      <input
-                        value={editName}
-                        onChange={(e) =>
-                          setEditName(e.target.value)
-                        }
-                        style={{
-                          padding: '10px',
-                          width: '100%',
-                          borderRadius: '10px',
-                          border:
-                            '1px solid #d1d5db',
-                          color: '#111827',
-                        }}
-                      />
-                    ) : (
-                      p.name
-                    )}
-                  </td>
-
-                  {/* Price */}
-                  <td
-                    style={{
-                      padding: '18px',
-                      color: '#111827',
-                    }}
-                  >
-                    {editingId === p._id ? (
-                      <input
-                        type="number"
-                        value={editPrice}
-                        onChange={(e) =>
-                          setEditPrice(
-                            e.target.value,
-                          )
-                        }
-                        style={{
-                          padding: '10px',
-                          width: '100%',
-                          borderRadius: '10px',
-                          border:
-                            '1px solid #d1d5db',
-                          color: '#111827',
-                        }}
-                      />
-                    ) : (
-                      `৳ ${p.price}`
-                    )}
-                  </td>
-
-                  {/* Category */}
-                  <td
-                    style={{
-                      padding: '18px',
-                      color: '#111827',
-                    }}
-                  >
-                    {editingId === p._id ? (
-                      <select
-                        value={editCategory}
-                        onChange={(e) =>
-                          setEditCategory(
-                            e.target.value,
-                          )
-                        }
-                        style={{
-                          padding: '10px',
-                          width: '100%',
-                          borderRadius: '10px',
-                          border:
-                            '1px solid #d1d5db',
-                          color: '#111827',
-                        }}
-                      >
-                        <option value="">
-                          Select Category
-                        </option>
-
-                        {categories.map((c: any) => (
-                          <option
-                            key={c._id}
-                            value={c._id}
-                          >
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      p.category?.name ||
-                      'No Category'
-                    )}
-                  </td>
-
-                  {/* Action */}
-                  <td
-                    style={{
-                      padding: '18px',
-                      display: 'flex',
-                      gap: '10px',
-                    }}
-                  >
-                    {editingId === p._id ? (
-                      <>
-                        {/* Save */}
-                        <button
-                          onClick={updateProduct}
-                          style={{
-                            padding: '9px 16px',
-                            border: 'none',
-                            borderRadius: '10px',
-                            background: '#16a34a',
-                            color: '#ffffff',
-                            cursor: 'pointer',
-                            fontWeight: 600,
-                            boxShadow:
-                              '0 4px 12px rgba(22,163,74,0.25)',
-                          }}
-                        >
-                          Save
-                        </button>
-
-                        {/* Cancel */}
-                        <button
-                          onClick={() =>
-                            setEditingId('')
-                          }
-                          style={{
-                            padding: '9px 16px',
-                            border: 'none',
-                            borderRadius: '10px',
-                            background: '#6b7280',
-                            color: '#ffffff',
-                            cursor: 'pointer',
-                            fontWeight: 600,
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        {/* Edit */}
-                        <button
-                          onClick={() =>
-                            startEdit(p)
-                          }
-                          style={{
-                            padding: '9px 16px',
-                            border: 'none',
-                            borderRadius: '10px',
-                            background: '#2563eb',
-                            color: '#ffffff',
-                            cursor: 'pointer',
-                            fontWeight: 600,
-                            boxShadow:
-                              '0 4px 12px rgba(37,99,235,0.25)',
-                          }}
-                        >
-                          Edit
-                        </button>
-
-                        {/* Delete */}
-                        <button
-                          onClick={() =>
-                            deleteProduct(p._id)
-                          }
-                          disabled={
-                            deletingId === p._id
-                          }
-                          style={{
-                            padding: '9px 16px',
-                            border: 'none',
-                            borderRadius: '10px',
-                            background:
-                              deletingId === p._id
-                                ? '#fca5a5'
-                                : '#dc2626',
-                            color: '#ffffff',
-                            cursor:
-                              deletingId === p._id
-                                ? 'not-allowed'
-                                : 'pointer',
-                            fontWeight: 600,
-                            boxShadow:
-                              '0 4px 12px rgba(220,38,38,0.25)',
-                          }}
-                        >
-                          {deletingId === p._id
-                            ? 'Deleting...'
-                            : 'Delete'}
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
