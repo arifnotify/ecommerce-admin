@@ -22,6 +22,7 @@ export default function ProductsPage() {
   // Loading State
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [deletingId, setDeletingId] = useState('');
 
   // Fetch Products
   const fetchProducts = async () => {
@@ -116,6 +117,34 @@ export default function ProductsPage() {
     }
   };
 
+  // Delete Product
+  const deleteProduct = async (id: string) => {
+    try {
+      setDeletingId(id);
+
+      const token = Cookies.get('token');
+
+      await api.delete(`/products/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      await fetchProducts();
+
+      alert('Product Deleted Successfully');
+    } catch (error: any) {
+      console.log(error.response?.data);
+
+      alert(
+        error.response?.data?.message ||
+          'Failed to delete product'
+      );
+    } finally {
+      setDeletingId('');
+    }
+  };
+
   // Loading UI
   if (loading) {
     return (
@@ -170,7 +199,7 @@ export default function ProductsPage() {
             color: '#6b7280',
           }}
         >
-          Add products and connect categories
+          Add, manage and delete products
         </p>
       </div>
 
@@ -278,8 +307,16 @@ export default function ProductsPage() {
         </button>
       </div>
 
-      {/* Product List */}
-      <div>
+      {/* Product Table */}
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '20px',
+          borderRadius: '16px',
+          boxShadow: '0 5px 20px rgba(0,0,0,0.05)',
+          overflowX: 'auto',
+        }}
+      >
         <h2
           style={{
             marginBottom: '20px',
@@ -289,63 +326,143 @@ export default function ProductsPage() {
           Product List
         </h2>
 
-        {products.length === 0 ? (
-          <div
-            style={{
-              background: '#ffffff',
-              padding: '20px',
-              borderRadius: '12px',
-              color: '#6b7280',
-            }}
-          >
-            No products found
-          </div>
-        ) : (
-          products.map((p: any) => (
-            <div
-              key={p._id}
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+          }}
+        >
+          <thead>
+            <tr
               style={{
-                background: '#ffffff',
-                padding: '18px',
-                borderRadius: '12px',
-                marginBottom: '15px',
-                boxShadow: '0 5px 15px rgba(0,0,0,0.04)',
+                background: '#f3f4f6',
               }}
             >
-              <h3
+              <th
                 style={{
-                  margin: 0,
+                  padding: '14px',
+                  textAlign: 'left',
                   color: '#111827',
                 }}
               >
-                {p.name}
-              </h3>
+                Name
+              </th>
 
-              <p
+              <th
                 style={{
-                  marginTop: '8px',
-                  color: '#6b7280',
+                  padding: '14px',
+                  textAlign: 'left',
+                  color: '#111827',
                 }}
               >
-                ৳ {p.price}
-              </p>
+                Price
+              </th>
 
-              {/* Category Show */}
-              {p.category && (
-                <p
+              <th
+                style={{
+                  padding: '14px',
+                  textAlign: 'left',
+                  color: '#111827',
+                }}
+              >
+                Category
+              </th>
+
+              <th
+                style={{
+                  padding: '14px',
+                  textAlign: 'left',
+                  color: '#111827',
+                }}
+              >
+                Action
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {products.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={4}
                   style={{
-                    marginTop: '6px',
-                    color: '#2563eb',
-                    fontSize: '14px',
-                    fontWeight: 500,
+                    padding: '20px',
+                    textAlign: 'center',
+                    color: '#6b7280',
                   }}
                 >
-                  Category: {p.category.name}
-                </p>
-              )}
-            </div>
-          ))
-        )}
+                  No products found
+                </td>
+              </tr>
+            ) : (
+              products.map((p: any) => (
+                <tr
+                  key={p._id}
+                  style={{
+                    borderBottom: '1px solid #e5e7eb',
+                  }}
+                >
+                  <td
+                    style={{
+                      padding: '14px',
+                      color: '#111827',
+                    }}
+                  >
+                    {p.name}
+                  </td>
+
+                  <td
+                    style={{
+                      padding: '14px',
+                      color: '#111827',
+                    }}
+                  >
+                    ৳ {p.price}
+                  </td>
+
+                  <td
+                    style={{
+                      padding: '14px',
+                      color: '#2563eb',
+                    }}
+                  >
+                    {p.category?.name || 'No Category'}
+                  </td>
+
+                  <td
+                    style={{
+                      padding: '14px',
+                    }}
+                  >
+                    <button
+                      onClick={() => deleteProduct(p._id)}
+                      disabled={deletingId === p._id}
+                      style={{
+                        padding: '8px 14px',
+                        border: 'none',
+                        borderRadius: '8px',
+                        background:
+                          deletingId === p._id
+                            ? '#fca5a5'
+                            : '#dc2626',
+                        color: '#ffffff',
+                        cursor:
+                          deletingId === p._id
+                            ? 'not-allowed'
+                            : 'pointer',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {deletingId === p._id
+                        ? 'Deleting...'
+                        : 'Delete'}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
