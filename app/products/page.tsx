@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
@@ -8,11 +8,18 @@ import { useRouter } from 'next/navigation';
 export default function ProductsPage() {
   const router = useRouter();
 
+  // Products State
   const [products, setProducts] = useState<any[]>([]);
 
+  // Categories State
+  const [categories, setCategories] = useState<any[]>([]);
+
+  // Form State
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [category, setCategory] = useState('');
 
+  // Loading State
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
 
@@ -36,21 +43,35 @@ export default function ProductsPage() {
     }
   };
 
+  // Fetch Categories
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get('/categories');
+
+      setCategories(res.data);
+    } catch (error) {
+      console.log(error);
+      alert('Failed to load categories');
+    }
+  };
+
+  // Load Data
   useEffect(() => {
     const token = Cookies.get('token');
 
-    // token না থাকলে login page এ পাঠাবে
+    // যদি token না থাকে login page এ পাঠাবে
     if (!token) {
       router.push('/');
       return;
     }
 
     fetchProducts();
+    fetchCategories();
   }, []);
 
   // Add Product
   const addProduct = async () => {
-    if (!name || !price) {
+    if (!name || !price || !category) {
       alert('Please fill all fields');
       return;
     }
@@ -58,16 +79,14 @@ export default function ProductsPage() {
     try {
       setAdding(true);
 
-      // এখানে fresh token নেওয়া হচ্ছে
       const token = Cookies.get('token');
-
-      console.log('TOKEN:', token);
 
       await api.post(
         '/products',
         {
           name,
           price: Number(price),
+          category,
         },
         {
           headers: {
@@ -76,11 +95,12 @@ export default function ProductsPage() {
         },
       );
 
-      // input clear
+      // Clear Inputs
       setName('');
       setPrice('');
+      setCategory('');
 
-      // products reload
+      // Reload Products
       await fetchProducts();
 
       alert('Product Added Successfully');
@@ -141,11 +161,20 @@ export default function ProductsPage() {
             fontSize: '30px',
           }}
         >
-          Products
+          Products Management
         </h1>
+
+        <p
+          style={{
+            marginTop: '10px',
+            color: '#6b7280',
+          }}
+        >
+          Add products and connect categories
+        </p>
       </div>
 
-      {/* Add Product */}
+      {/* Add Product Card */}
       <div
         style={{
           background: '#ffffff',
@@ -166,6 +195,7 @@ export default function ProductsPage() {
           Add New Product
         </h2>
 
+        {/* Product Name */}
         <input
           type="text"
           placeholder="Product Name"
@@ -184,11 +214,29 @@ export default function ProductsPage() {
           }}
         />
 
+        {/* Product Price */}
         <input
           type="number"
           placeholder="Product Price"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '12px',
+            marginBottom: '15px',
+            borderRadius: '10px',
+            border: '1px solid #d1d5db',
+            fontSize: '15px',
+            boxSizing: 'border-box',
+            color: '#111827',
+            backgroundColor: '#ffffff',
+          }}
+        />
+
+        {/* Category Select */}
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
           style={{
             width: '100%',
             padding: '12px',
@@ -200,8 +248,17 @@ export default function ProductsPage() {
             color: '#111827',
             backgroundColor: '#ffffff',
           }}
-        />
+        >
+          <option value="">Select Category</option>
 
+          {categories.map((c: any) => (
+            <option key={c._id} value={c._id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Add Button */}
         <button
           onClick={addProduct}
           disabled={adding}
@@ -272,6 +329,20 @@ export default function ProductsPage() {
               >
                 ৳ {p.price}
               </p>
+
+              {/* Category Show */}
+              {p.category && (
+                <p
+                  style={{
+                    marginTop: '6px',
+                    color: '#2563eb',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                  }}
+                >
+                  Category: {p.category.name}
+                </p>
+              )}
             </div>
           ))
         )}
