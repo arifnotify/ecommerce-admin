@@ -156,18 +156,8 @@ export default function CategoriesPage() {
       {/* LIST */}
       <div style={styles.list}>
         {categories.map((c) => (
-          <div
-            key={c._id}
-            style={styles.item}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.boxShadow =
-                '0 10px 25px rgba(0,0,0,0.08)')
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.boxShadow =
-                '0 6px 18px rgba(0,0,0,0.04)')
-            }
-          >
+          <div key={c._id} style={styles.item}>
+            
             <div style={{ flex: 1 }}>
               {editId === c._id ? (
                 <input
@@ -257,6 +247,9 @@ const styles: any = {
     border: '1px solid #ddd',
     marginBottom: 10,
     outline: 'none',
+    color: '#111827',        // ✅ FIXED TEXT COLOR
+    backgroundColor: '#fff',
+    fontSize: 15,
   },
 
   addBtn: {
@@ -284,14 +277,12 @@ const styles: any = {
     justifyContent: 'space-between',
     alignItems: 'center',
     boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
-    transition: '0.2s',
   },
 
   name: {
     fontSize: 17,
     fontWeight: 600,
-    color: '#111827', // 🔥 FIXED readable color
-    letterSpacing: '0.2px',
+    color: '#111827',
   },
 
   actions: {
@@ -304,6 +295,10 @@ const styles: any = {
     padding: 10,
     borderRadius: 8,
     border: '1px solid #ccc',
+    color: '#111827',        // ✅ FIXED TEXT COLOR
+    backgroundColor: '#fff',
+    fontSize: 15,
+    outline: 'none',
   },
 
   editBtn: {
