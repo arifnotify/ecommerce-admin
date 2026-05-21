@@ -19,18 +19,16 @@ export default function ProductsPage() {
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
 
-  // Multiple Images
-  const [images, setImages] = useState<string[]>(
-    [],
-  );
-
-  // Upload State
-  const [uploading, setUploading] =
-    useState(false);
+  // Edit Product State
+  const [editingId, setEditingId] = useState('');
+  const [editName, setEditName] = useState('');
+  const [editPrice, setEditPrice] = useState('');
+  const [editCategory, setEditCategory] = useState('');
 
   // Loading State
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [deletingId, setDeletingId] = useState('');
 
   // Fetch Products
   const fetchProducts = async () => {
@@ -56,45 +54,10 @@ export default function ProductsPage() {
   const fetchCategories = async () => {
     try {
       const res = await api.get('/categories');
-
       setCategories(res.data);
     } catch (error) {
       console.log(error);
       alert('Failed to load categories');
-    }
-  };
-
-  // Upload Multiple Images
-  const uploadImages = async (
-    files: FileList,
-  ) => {
-    try {
-      setUploading(true);
-
-      const uploadedImages: string[] = [];
-
-      for (const file of Array.from(files)) {
-        const formData = new FormData();
-
-        formData.append('file', file);
-
-        const res = await api.post(
-          '/upload',
-          formData,
-        );
-
-        uploadedImages.push(res.data.url);
-      }
-
-      setImages(uploadedImages);
-
-      alert('Images Uploaded Successfully');
-    } catch (error: any) {
-      console.log(error.response?.data);
-
-      alert('Image upload failed');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -113,12 +76,7 @@ export default function ProductsPage() {
 
   // Add Product
   const addProduct = async () => {
-    if (
-      !name ||
-      !price ||
-      !category ||
-      images.length === 0
-    ) {
+    if (!name || !price || !category) {
       alert('Please fill all fields');
       return;
     }
@@ -134,7 +92,6 @@ export default function ProductsPage() {
           name,
           price: Number(price),
           category,
-          images,
         },
         {
           headers: {
@@ -143,13 +100,10 @@ export default function ProductsPage() {
         },
       );
 
-      // Reset
       setName('');
       setPrice('');
       setCategory('');
-      setImages([]);
 
-      // Reload Products
       await fetchProducts();
 
       alert('Product Added Successfully');
@@ -168,6 +122,8 @@ export default function ProductsPage() {
   // Delete Product
   const deleteProduct = async (id: string) => {
     try {
+      setDeletingId(id);
+
       const token = Cookies.get('token');
 
       await api.delete(`/products/${id}`, {
@@ -185,6 +141,58 @@ export default function ProductsPage() {
       alert(
         error.response?.data?.message ||
           'Failed to delete product',
+      );
+    } finally {
+      setDeletingId('');
+    }
+  };
+
+  // Start Edit
+  const startEdit = (product: any) => {
+    setEditingId(product._id);
+    setEditName(product.name);
+    setEditPrice(product.price);
+    setEditCategory(product.category?._id || '');
+  };
+
+  // Update Product
+  const updateProduct = async () => {
+    if (!editName || !editPrice || !editCategory) {
+      alert('Please fill all fields');
+      return;
+    }
+
+    try {
+      const token = Cookies.get('token');
+
+      await api.patch(
+        `/products/${editingId}`,
+        {
+          name: editName,
+          price: Number(editPrice),
+          category: editCategory,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setEditingId('');
+      setEditName('');
+      setEditPrice('');
+      setEditCategory('');
+
+      await fetchProducts();
+
+      alert('Product Updated Successfully');
+    } catch (error: any) {
+      console.log(error.response?.data);
+
+      alert(
+        error.response?.data?.message ||
+          'Failed to update product',
       );
     }
   };
@@ -225,9 +233,9 @@ export default function ProductsPage() {
           background: '#ffffff',
           padding: '30px',
           borderRadius: '24px',
-          boxShadow:
-            '0 10px 30px rgba(0,0,0,0.08)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
           marginBottom: '30px',
+          border: '1px solid #e5e7eb',
         }}
       >
         <h1
@@ -243,24 +251,25 @@ export default function ProductsPage() {
 
         <p
           style={{
-            marginTop: '10px',
+            marginTop: '12px',
             color: '#6b7280',
+            fontSize: '16px',
           }}
         >
-          Upload and manage ecommerce products
+          Add, edit and manage your products easily
         </p>
       </div>
 
-      {/* Add Product */}
+      {/* Add Product Card */}
       <div
         style={{
           background: '#ffffff',
           padding: '30px',
           borderRadius: '24px',
-          boxShadow:
-            '0 10px 30px rgba(0,0,0,0.08)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
           marginBottom: '35px',
-          maxWidth: '650px',
+          maxWidth: '550px',
+          border: '1px solid #e5e7eb',
         }}
       >
         <h2
@@ -278,9 +287,7 @@ export default function ProductsPage() {
           type="text"
           placeholder="Product Name"
           value={name}
-          onChange={(e) =>
-            setName(e.target.value)
-          }
+          onChange={(e) => setName(e.target.value)}
           style={{
             width: '100%',
             padding: '14px',
@@ -290,8 +297,8 @@ export default function ProductsPage() {
             fontSize: '15px',
             color: '#111827',
             backgroundColor: '#ffffff',
-            outline: 'none',
             boxSizing: 'border-box',
+            outline: 'none',
           }}
         />
 
@@ -300,9 +307,7 @@ export default function ProductsPage() {
           type="number"
           placeholder="Product Price"
           value={price}
-          onChange={(e) =>
-            setPrice(e.target.value)
-          }
+          onChange={(e) => setPrice(e.target.value)}
           style={{
             width: '100%',
             padding: '14px',
@@ -312,33 +317,29 @@ export default function ProductsPage() {
             fontSize: '15px',
             color: '#111827',
             backgroundColor: '#ffffff',
-            outline: 'none',
             boxSizing: 'border-box',
+            outline: 'none',
           }}
         />
 
         {/* Category */}
         <select
           value={category}
-          onChange={(e) =>
-            setCategory(e.target.value)
-          }
+          onChange={(e) => setCategory(e.target.value)}
           style={{
             width: '100%',
             padding: '14px',
-            marginBottom: '16px',
+            marginBottom: '20px',
             borderRadius: '14px',
             border: '1px solid #d1d5db',
             fontSize: '15px',
             color: '#111827',
             backgroundColor: '#ffffff',
-            outline: 'none',
             boxSizing: 'border-box',
+            outline: 'none',
           }}
         >
-          <option value="">
-            Select Category
-          </option>
+          <option value="">Select Category</option>
 
           {categories.map((c: any) => (
             <option key={c._id} value={c._id}>
@@ -347,81 +348,40 @@ export default function ProductsPage() {
           ))}
         </select>
 
-        {/* Upload Images */}
-        <input
-          type="file"
-          multiple
-          onChange={(e) => {
-            if (e.target.files) {
-              uploadImages(e.target.files);
-            }
-          }}
-          style={{
-            marginBottom: '20px',
-            color: '#111827',
-          }}
-        />
-
-        {/* Images Preview */}
-        {images.length > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              gap: '12px',
-              flexWrap: 'wrap',
-              marginBottom: '20px',
-            }}
-          >
-            {images.map((img, index) => (
-              <img
-                key={index}
-                src={img}
-                alt="product"
-                style={{
-                  width: '120px',
-                  height: '120px',
-                  objectFit: 'cover',
-                  borderRadius: '14px',
-                  border:
-                    '1px solid #e5e7eb',
-                }}
-              />
-            ))}
-          </div>
-        )}
-
         {/* Add Button */}
         <button
           onClick={addProduct}
-          disabled={adding || uploading}
+          disabled={adding}
           style={{
             width: '100%',
             padding: '15px',
             border: 'none',
             borderRadius: '14px',
-            background:
-              adding || uploading
-                ? '#93c5fd'
-                : '#2563eb',
+            background: adding ? '#93c5fd' : '#2563eb',
             color: '#ffffff',
             fontSize: '16px',
             fontWeight: 700,
-            cursor:
-              adding || uploading
-                ? 'not-allowed'
-                : 'pointer',
+            cursor: adding ? 'not-allowed' : 'pointer',
+            transition: '0.3s',
+            boxShadow:
+              '0 6px 18px rgba(37,99,235,0.3)',
           }}
         >
-          {uploading
-            ? 'Uploading Images...'
-            : adding
-            ? 'Adding Product...'
-            : 'Add Product'}
+          {adding ? 'Adding Product...' : 'Add Product'}
         </button>
       </div>
 
-      {/* Product List */}
-      <div>
+      {/* Product Table */}
+      <div
+        style={{
+          background: '#ffffff',
+          padding: '25px',
+          borderRadius: '24px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+          overflowX: 'auto',
+          border: '1px solid #e5e7eb',
+        }}
+      >
         <h2
           style={{
             marginBottom: '20px',
@@ -431,135 +391,293 @@ export default function ProductsPage() {
           Product List
         </h2>
 
-        {products.length === 0 ? (
-          <div
-            style={{
-              background: '#ffffff',
-              padding: '20px',
-              borderRadius: '14px',
-              color: '#6b7280',
-            }}
-          >
-            No products found
-          </div>
-        ) : (
-          products.map((p: any) => (
-            <div
-              key={p._id}
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+          }}
+        >
+          <thead>
+            <tr
               style={{
-                background: '#ffffff',
-                padding: '24px',
-                borderRadius: '20px',
-                marginBottom: '20px',
-                boxShadow:
-                  '0 5px 20px rgba(0,0,0,0.05)',
+                background: '#eff6ff',
               }}
             >
-              {/* Images */}
-              <div
+              <th
                 style={{
-                  display: 'flex',
-                  gap: '12px',
-                  flexWrap: 'wrap',
-                  marginBottom: '18px',
+                  padding: '18px',
+                  textAlign: 'left',
+                  color: '#1e3a8a',
+                  fontWeight: 'bold',
                 }}
               >
-                {p.images?.map(
-                  (
-                    img: string,
-                    index: number,
-                  ) => (
-                    <img
-                      key={index}
-                      src={img}
-                      alt={p.name}
-                      style={{
-                        width: '110px',
-                        height: '110px',
-                        objectFit: 'cover',
-                        borderRadius: '14px',
-                      }}
-                    />
-                  ),
-                )}
-              </div>
+                Name
+              </th>
 
-              {/* Product Name */}
-              <h3
+              <th
                 style={{
-                  margin: 0,
-                  marginBottom: '10px',
-                  color: '#111827',
-                  fontSize: '24px',
+                  padding: '18px',
+                  textAlign: 'left',
+                  color: '#1e3a8a',
+                  fontWeight: 'bold',
                 }}
               >
-                {p.name}
-              </h3>
+                Price
+              </th>
 
-              {/* Price */}
-              <p
+              <th
                 style={{
-                  color: '#374151',
-                  marginBottom: '8px',
-                  fontSize: '16px',
+                  padding: '18px',
+                  textAlign: 'left',
+                  color: '#1e3a8a',
+                  fontWeight: 'bold',
                 }}
               >
-                Price: ৳ {p.price}
-              </p>
+                Category
+              </th>
 
-              {/* Category */}
-              <p
+              <th
                 style={{
-                  color: '#6b7280',
-                  marginBottom: '18px',
+                  padding: '18px',
+                  textAlign: 'left',
+                  color: '#1e3a8a',
+                  fontWeight: 'bold',
                 }}
               >
-                Category:{' '}
-                {p.category?.name ||
-                  'No Category'}
-              </p>
+                Action
+              </th>
+            </tr>
+          </thead>
 
-              {/* Buttons */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '10px',
-                }}
-              >
-                <button
+          <tbody>
+            {products.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={4}
                   style={{
-                    padding: '10px 18px',
-                    border: 'none',
-                    borderRadius: '10px',
-                    background: '#2563eb',
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                    fontWeight: 600,
+                    padding: '25px',
+                    textAlign: 'center',
+                    color: '#6b7280',
                   }}
                 >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() =>
-                    deleteProduct(p._id)
-                  }
+                  No products found
+                </td>
+              </tr>
+            ) : (
+              products.map((p: any) => (
+                <tr
+                  key={p._id}
                   style={{
-                    padding: '10px 18px',
-                    border: 'none',
-                    borderRadius: '10px',
-                    background: '#dc2626',
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                    fontWeight: 600,
+                    borderBottom:
+                      '1px solid #f1f5f9',
                   }}
                 >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
-        )}
+                  {/* Name */}
+                  <td
+                    style={{
+                      padding: '18px',
+                      color: '#111827',
+                    }}
+                  >
+                    {editingId === p._id ? (
+                      <input
+                        value={editName}
+                        onChange={(e) =>
+                          setEditName(e.target.value)
+                        }
+                        style={{
+                          padding: '10px',
+                          width: '100%',
+                          borderRadius: '10px',
+                          border:
+                            '1px solid #d1d5db',
+                          color: '#111827',
+                        }}
+                      />
+                    ) : (
+                      p.name
+                    )}
+                  </td>
+
+                  {/* Price */}
+                  <td
+                    style={{
+                      padding: '18px',
+                      color: '#111827',
+                    }}
+                  >
+                    {editingId === p._id ? (
+                      <input
+                        type="number"
+                        value={editPrice}
+                        onChange={(e) =>
+                          setEditPrice(
+                            e.target.value,
+                          )
+                        }
+                        style={{
+                          padding: '10px',
+                          width: '100%',
+                          borderRadius: '10px',
+                          border:
+                            '1px solid #d1d5db',
+                          color: '#111827',
+                        }}
+                      />
+                    ) : (
+                      `৳ ${p.price}`
+                    )}
+                  </td>
+
+                  {/* Category */}
+                  <td
+                    style={{
+                      padding: '18px',
+                      color: '#111827',
+                    }}
+                  >
+                    {editingId === p._id ? (
+                      <select
+                        value={editCategory}
+                        onChange={(e) =>
+                          setEditCategory(
+                            e.target.value,
+                          )
+                        }
+                        style={{
+                          padding: '10px',
+                          width: '100%',
+                          borderRadius: '10px',
+                          border:
+                            '1px solid #d1d5db',
+                          color: '#111827',
+                        }}
+                      >
+                        <option value="">
+                          Select Category
+                        </option>
+
+                        {categories.map((c: any) => (
+                          <option
+                            key={c._id}
+                            value={c._id}
+                          >
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      p.category?.name ||
+                      'No Category'
+                    )}
+                  </td>
+
+                  {/* Action */}
+                  <td
+                    style={{
+                      padding: '18px',
+                      display: 'flex',
+                      gap: '10px',
+                    }}
+                  >
+                    {editingId === p._id ? (
+                      <>
+                        {/* Save */}
+                        <button
+                          onClick={updateProduct}
+                          style={{
+                            padding: '9px 16px',
+                            border: 'none',
+                            borderRadius: '10px',
+                            background: '#16a34a',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            boxShadow:
+                              '0 4px 12px rgba(22,163,74,0.25)',
+                          }}
+                        >
+                          Save
+                        </button>
+
+                        {/* Cancel */}
+                        <button
+                          onClick={() =>
+                            setEditingId('')
+                          }
+                          style={{
+                            padding: '9px 16px',
+                            border: 'none',
+                            borderRadius: '10px',
+                            background: '#6b7280',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        {/* Edit */}
+                        <button
+                          onClick={() =>
+                            startEdit(p)
+                          }
+                          style={{
+                            padding: '9px 16px',
+                            border: 'none',
+                            borderRadius: '10px',
+                            background: '#2563eb',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            boxShadow:
+                              '0 4px 12px rgba(37,99,235,0.25)',
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        {/* Delete */}
+                        <button
+                          onClick={() =>
+                            deleteProduct(p._id)
+                          }
+                          disabled={
+                            deletingId === p._id
+                          }
+                          style={{
+                            padding: '9px 16px',
+                            border: 'none',
+                            borderRadius: '10px',
+                            background:
+                              deletingId === p._id
+                                ? '#fca5a5'
+                                : '#dc2626',
+                            color: '#ffffff',
+                            cursor:
+                              deletingId === p._id
+                                ? 'not-allowed'
+                                : 'pointer',
+                            fontWeight: 600,
+                            boxShadow:
+                              '0 4px 12px rgba(220,38,38,0.25)',
+                          }}
+                        >
+                          {deletingId === p._id
+                            ? 'Deleting...'
+                            : 'Delete'}
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
