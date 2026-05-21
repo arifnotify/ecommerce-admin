@@ -29,7 +29,6 @@ export default function CategoriesPage() {
     fetchCategories();
   }, []);
 
-  // GET ALL
   const fetchCategories = async () => {
     try {
       const res = await api.get('/categories');
@@ -42,7 +41,6 @@ export default function CategoriesPage() {
     }
   };
 
-  // ADD
   const addCategory = async () => {
     if (!name) return alert('Enter category name');
 
@@ -67,7 +65,6 @@ export default function CategoriesPage() {
     }
   };
 
-  // DELETE
   const deleteCategory = async (id: string) => {
     if (!confirm('Are you sure?')) return;
 
@@ -87,19 +84,16 @@ export default function CategoriesPage() {
     }
   };
 
-  // START EDIT
   const startEdit = (c: any) => {
     setEditId(c._id);
     setEditName(c.name);
   };
 
-  // CANCEL EDIT
   const cancelEdit = () => {
     setEditId(null);
     setEditName('');
   };
 
-  // UPDATE (FIXED)
   const updateCategory = async (id: string) => {
     if (!editName) return alert('Name required');
 
@@ -108,7 +102,7 @@ export default function CategoriesPage() {
 
       const res = await api.patch(
         `/categories/${id}`,
-        { name: editName }, // backend expects { name }
+        { name: editName },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -134,24 +128,19 @@ export default function CategoriesPage() {
   };
 
   if (loading) {
-    return (
-      <div style={styles.loading}>
-        Loading...
-      </div>
-    );
+    return <div style={styles.loading}>Loading Categories...</div>;
   }
 
   return (
     <div style={styles.page}>
-      
       <h1 style={styles.title}>Categories Management</h1>
 
-      {/* ADD */}
+      {/* ADD CATEGORY */}
       <div style={styles.card}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="New category name"
+          placeholder="Enter category name"
           style={styles.input}
         />
 
@@ -167,8 +156,18 @@ export default function CategoriesPage() {
       {/* LIST */}
       <div style={styles.list}>
         {categories.map((c) => (
-          <div key={c._id} style={styles.item}>
-            
+          <div
+            key={c._id}
+            style={styles.item}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.boxShadow =
+                '0 10px 25px rgba(0,0,0,0.08)')
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.boxShadow =
+                '0 6px 18px rgba(0,0,0,0.04)')
+            }
+          >
             <div style={{ flex: 1 }}>
               {editId === c._id ? (
                 <input
@@ -192,7 +191,10 @@ export default function CategoriesPage() {
                     Save
                   </button>
 
-                  <button onClick={cancelEdit} style={styles.cancelBtn}>
+                  <button
+                    onClick={cancelEdit}
+                    style={styles.cancelBtn}
+                  >
                     Cancel
                   </button>
                 </>
@@ -236,6 +238,7 @@ const styles: any = {
     fontSize: 30,
     marginBottom: 20,
     color: '#111827',
+    fontWeight: 700,
   },
 
   card: {
@@ -244,6 +247,7 @@ const styles: any = {
     borderRadius: 14,
     maxWidth: 500,
     marginBottom: 25,
+    boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
   },
 
   input: {
@@ -252,6 +256,7 @@ const styles: any = {
     borderRadius: 10,
     border: '1px solid #ddd',
     marginBottom: 10,
+    outline: 'none',
   },
 
   addBtn: {
@@ -262,6 +267,7 @@ const styles: any = {
     border: 'none',
     borderRadius: 10,
     cursor: 'pointer',
+    fontWeight: 600,
   },
 
   list: {
@@ -277,11 +283,15 @@ const styles: any = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
+    transition: '0.2s',
   },
 
   name: {
-    fontSize: 16,
-    fontWeight: 500,
+    fontSize: 17,
+    fontWeight: 600,
+    color: '#111827', // 🔥 FIXED readable color
+    letterSpacing: '0.2px',
   },
 
   actions: {
@@ -303,6 +313,7 @@ const styles: any = {
     padding: '6px 10px',
     borderRadius: 8,
     cursor: 'pointer',
+    fontWeight: 600,
   },
 
   deleteBtn: {
@@ -312,6 +323,7 @@ const styles: any = {
     padding: '6px 10px',
     borderRadius: 8,
     cursor: 'pointer',
+    fontWeight: 600,
   },
 
   saveBtn: {
@@ -321,6 +333,7 @@ const styles: any = {
     padding: '6px 10px',
     borderRadius: 8,
     cursor: 'pointer',
+    fontWeight: 600,
   },
 
   cancelBtn: {
@@ -330,6 +343,7 @@ const styles: any = {
     padding: '6px 10px',
     borderRadius: 8,
     cursor: 'pointer',
+    fontWeight: 600,
   },
 
   loading: {
@@ -339,5 +353,6 @@ const styles: any = {
     alignItems: 'center',
     fontSize: 20,
     color: '#2563eb',
+    fontWeight: 600,
   },
 };
