@@ -8,8 +8,6 @@ import { useRouter } from 'next/navigation';
 export default function ProductsPage() {
   const router = useRouter();
 
-  const token = Cookies.get('token');
-
   const [products, setProducts] = useState<any[]>([]);
 
   const [name, setName] = useState('');
@@ -18,10 +16,10 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
 
-  // Products Fetch
+  // Fetch Products
   const fetchProducts = async () => {
     try {
-      setLoading(true);
+      const token = Cookies.get('token');
 
       const res = await api.get('/products', {
         headers: {
@@ -39,6 +37,8 @@ export default function ProductsPage() {
   };
 
   useEffect(() => {
+    const token = Cookies.get('token');
+
     // token না থাকলে login page এ পাঠাবে
     if (!token) {
       router.push('/');
@@ -58,6 +58,11 @@ export default function ProductsPage() {
     try {
       setAdding(true);
 
+      // এখানে fresh token নেওয়া হচ্ছে
+      const token = Cookies.get('token');
+
+      console.log('TOKEN:', token);
+
       await api.post(
         '/products',
         {
@@ -75,13 +80,17 @@ export default function ProductsPage() {
       setName('');
       setPrice('');
 
-      // reload products
-      fetchProducts();
+      // products reload
+      await fetchProducts();
 
       alert('Product Added Successfully');
-    } catch (error) {
-      console.log(error);
-      alert('Failed to add product');
+    } catch (error: any) {
+      console.log(error.response?.data);
+
+      alert(
+        error.response?.data?.message ||
+          'Failed to add product'
+      );
     } finally {
       setAdding(false);
     }
@@ -134,18 +143,9 @@ export default function ProductsPage() {
         >
           Products
         </h1>
-
-        <p
-          style={{
-            marginTop: '10px',
-            color: '#6b7280',
-          }}
-        >
-          Manage your products easily
-        </p>
       </div>
 
-      {/* Add Product Form */}
+      {/* Add Product */}
       <div
         style={{
           background: '#ffffff',
@@ -166,7 +166,6 @@ export default function ProductsPage() {
           Add New Product
         </h2>
 
-        {/* Name */}
         <input
           type="text"
           placeholder="Product Name"
@@ -185,7 +184,6 @@ export default function ProductsPage() {
           }}
         />
 
-        {/* Price */}
         <input
           type="number"
           placeholder="Product Price"
@@ -204,7 +202,6 @@ export default function ProductsPage() {
           }}
         />
 
-        {/* Button */}
         <button
           onClick={addProduct}
           disabled={adding}
@@ -224,7 +221,7 @@ export default function ProductsPage() {
         </button>
       </div>
 
-      {/* Products List */}
+      {/* Product List */}
       <div>
         <h2
           style={{
@@ -256,30 +253,25 @@ export default function ProductsPage() {
                 borderRadius: '12px',
                 marginBottom: '15px',
                 boxShadow: '0 5px 15px rgba(0,0,0,0.04)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
               }}
             >
-              <div>
-                <h3
-                  style={{
-                    margin: 0,
-                    color: '#111827',
-                  }}
-                >
-                  {p.name}
-                </h3>
+              <h3
+                style={{
+                  margin: 0,
+                  color: '#111827',
+                }}
+              >
+                {p.name}
+              </h3>
 
-                <p
-                  style={{
-                    marginTop: '8px',
-                    color: '#6b7280',
-                  }}
-                >
-                  ৳ {p.price}
-                </p>
-              </div>
+              <p
+                style={{
+                  marginTop: '8px',
+                  color: '#6b7280',
+                }}
+              >
+                ৳ {p.price}
+              </p>
             </div>
           ))
         )}
