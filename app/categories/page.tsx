@@ -1,55 +1,54 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import api from '@/lib/api';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 
 export default function CategoriesPage() {
   const router = useRouter();
-
-  // Token
   const token = Cookies.get('token');
 
-  // States
   const [categories, setCategories] = useState<any[]>([]);
   const [name, setName] = useState('');
 
-  // Loading States
+  // EDIT
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+
+  // UI STATES
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Fetch Categories
+  // SEARCH + PAGINATION
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const limit = 5;
+
+  // AUTH CHECK
+  useEffect(() => {
+    if (!token) router.push('/');
+    else fetchCategories();
+  }, []);
+
+  // FETCH
   const fetchCategories = async () => {
     try {
+      setLoading(true);
       const res = await api.get('/categories');
-
       setCategories(res.data);
-    } catch (error) {
-      console.log(error);
+    } catch {
       alert('Failed to load categories');
     } finally {
       setLoading(false);
     }
   };
 
-  // Load Categories
-  useEffect(() => {
-    // যদি token না থাকে login page এ পাঠাবে
-    if (!token) {
-      router.push('/');
-      return;
-    }
-
-    fetchCategories();
-  }, []);
-
-  // Add Category
+  // ADD
   const addCategory = async () => {
-    if (!name) {
-      alert('Please enter category name');
-      return;
-    }
+    if (!name) return alert('Enter category name');
 
     try {
       setAdding(true);
@@ -57,195 +56,212 @@ export default function CategoriesPage() {
       await api.post(
         '/categories',
         { name },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Clear Input
       setName('');
-
-      // Reload Categories
       await fetchCategories();
-
-      alert('Category Added Successfully');
-    } catch (error: any) {
-      console.log(error.response?.data);
-
-      alert(
-        error.response?.data?.message ||
-          'Failed to add category'
-      );
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed');
     } finally {
       setAdding(false);
     }
   };
 
-  // Loading Screen
+  // DELETE
+  const deleteCategory = async (id: string) => {
+    if (!confirm('Are you sure?')) return;
+
+    try {
+      setDeletingId(id);
+
+      await api.delete(`/categories/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setCategories((prev) => prev.filter((c) => c._id !== id));
+    } catch {
+      alert('Delete failed');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // EDIT START
+  const startEdit = (c: any) => {
+    setEditId(c._id);
+    setEditName(c.name);
+  };
+
+  const cancelEdit = () => {
+    setEditId(null);
+    setEditName('');
+  };
+
+  // UPDATE
+  const updateCategory = async (id: string) => {
+    if (!editName) return;
+
+    try {
+      setUpdating(true);
+
+      await api.put(
+        `/categories/${id}`,
+        { name: editName },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setCategories((prev) =>
+        prev.map((c) =>
+          c._id === id ? { ...c, name: editName } : c
+        )
+      );
+
+      cancelEdit();
+    } catch {
+      alert('Update failed');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // FILTER SEARCH
+  const filtered = useMemo(() => {
+    return categories.filter((c) =>
+      c.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [categories, search]);
+
+  // PAGINATION
+  const totalPages = Math.ceil(filtered.length / limit);
+
+  const paginated = useMemo(() => {
+    const start = (page - 1) * limit;
+    return filtered.slice(start, start + limit);
+  }, [filtered, page]);
+
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          background: '#f4f7fb',
-          fontSize: '20px',
-          fontWeight: 'bold',
-          color: '#2563eb',
-        }}
-      >
-        Loading Categories...
+      <div style={{ padding: 50, textAlign: 'center' }}>
+        Loading...
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: '#f4f7fb',
-        padding: '30px',
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          background: '#ffffff',
-          padding: '20px',
-          borderRadius: '16px',
-          boxShadow: '0 5px 20px rgba(0,0,0,0.05)',
-          marginBottom: '25px',
-        }}
-      >
-        <h1
-          style={{
-            margin: 0,
-            color: '#111827',
-            fontSize: '30px',
-          }}
-        >
-          Categories Management
-        </h1>
-
-        <p
-          style={{
-            marginTop: '10px',
-            color: '#6b7280',
-          }}
-        >
-          Create and manage product categories
-        </p>
+    <div style={{ padding: 30, background: '#f4f7fb', minHeight: '100vh' }}>
+      
+      {/* HEADER */}
+      <div style={{ marginBottom: 20 }}>
+        <h1>Categories Management</h1>
       </div>
 
-      {/* Add Category Card */}
-      <div
-        style={{
-          background: '#ffffff',
-          padding: '25px',
-          borderRadius: '16px',
-          boxShadow: '0 5px 20px rgba(0,0,0,0.05)',
-          marginBottom: '30px',
-          maxWidth: '500px',
+      {/* SEARCH */}
+      <input
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
         }}
-      >
-        <h2
-          style={{
-            marginTop: 0,
-            marginBottom: '20px',
-            color: '#111827',
-          }}
-        >
-          Add New Category
-        </h2>
+        placeholder="Search category..."
+        style={{
+          width: '100%',
+          padding: 10,
+          marginBottom: 20,
+          borderRadius: 8,
+          border: '1px solid #ccc',
+        }}
+      />
 
-        {/* Input */}
+      {/* ADD */}
+      <div style={{ background: '#fff', padding: 20, marginBottom: 20 }}>
         <input
-          type="text"
-          placeholder="Category Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '12px',
-            marginBottom: '20px',
-            borderRadius: '10px',
-            border: '1px solid #d1d5db',
-            fontSize: '15px',
-            boxSizing: 'border-box',
-            color: '#111827',
-            backgroundColor: '#ffffff',
-          }}
+          placeholder="New category"
+          style={{ width: '100%', padding: 10, marginBottom: 10 }}
         />
 
-        {/* Button */}
-        <button
-          onClick={addCategory}
-          disabled={adding}
-          style={{
-            width: '100%',
-            padding: '13px',
-            border: 'none',
-            borderRadius: '10px',
-            background: adding ? '#93c5fd' : '#2563eb',
-            color: '#ffffff',
-            fontSize: '16px',
-            fontWeight: 600,
-            cursor: adding ? 'not-allowed' : 'pointer',
-          }}
-        >
-          {adding ? 'Adding Category...' : 'Add Category'}
+        <button onClick={addCategory} disabled={adding}>
+          {adding ? 'Adding...' : 'Add Category'}
         </button>
       </div>
 
-      {/* Categories List */}
-      <div>
-        <h2
+      {/* LIST */}
+      {paginated.map((c: any) => (
+        <div
+          key={c._id}
           style={{
-            marginBottom: '20px',
-            color: '#111827',
+            background: '#fff',
+            padding: 15,
+            marginBottom: 10,
+            borderRadius: 10,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
-          Categories List
-        </h2>
-
-        {categories.length === 0 ? (
-          <div
-            style={{
-              background: '#ffffff',
-              padding: '20px',
-              borderRadius: '12px',
-              color: '#6b7280',
-            }}
-          >
-            No categories found
+          {/* LEFT */}
+          <div style={{ flex: 1 }}>
+            {editId === c._id ? (
+              <input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                style={{ padding: 8, width: '100%' }}
+              />
+            ) : (
+              <h3 style={{ margin: 0 }}>{c.name}</h3>
+            )}
           </div>
-        ) : (
-          categories.map((c: any) => (
-            <div
-              key={c._id}
-              style={{
-                background: '#ffffff',
-                padding: '18px',
-                borderRadius: '12px',
-                marginBottom: '15px',
-                boxShadow: '0 5px 15px rgba(0,0,0,0.04)',
-              }}
-            >
-              <h3
-                style={{
-                  margin: 0,
-                  color: '#111827',
-                }}
-              >
-                {c.name}
-              </h3>
-            </div>
-          ))
-        )}
+
+          {/* ACTIONS */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {editId === c._id ? (
+              <>
+                <button
+                  onClick={() => updateCategory(c._id)}
+                  disabled={updating}
+                >
+                  Save
+                </button>
+
+                <button onClick={cancelEdit}>Cancel</button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => startEdit(c)}>Edit</button>
+
+                <button
+                  onClick={() => deleteCategory(c._id)}
+                  disabled={deletingId === c._id}
+                >
+                  {deletingId === c._id ? 'Deleting...' : 'Delete'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {/* PAGINATION */}
+      <div style={{ marginTop: 20, display: 'flex', gap: 10 }}>
+        <button
+          disabled={page === 1}
+          onClick={() => setPage(page - 1)}
+        >
+          Prev
+        </button>
+
+        <span>
+          Page {page} / {totalPages || 1}
+        </span>
+
+        <button
+          disabled={page === totalPages}
+          onClick={() => setPage(page + 1)}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
