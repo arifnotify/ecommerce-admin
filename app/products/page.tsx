@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -13,27 +12,40 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
 
   // Categories State
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] =
+    useState<any[]>([]);
 
   // Add Product State
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] =
+    useState('');
   const [image, setImage] = useState('');
 
   // Upload State
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] =
+    useState(false);
 
   // Edit Product State
-  const [editingId, setEditingId] = useState('');
-  const [editName, setEditName] = useState('');
-  const [editPrice, setEditPrice] = useState('');
+  const [editingId, setEditingId] =
+    useState('');
+
+  const [editName, setEditName] =
+    useState('');
+
+  const [editPrice, setEditPrice] =
+    useState('');
+
   const [editCategory, setEditCategory] =
     useState('');
 
   // Loading State
-  const [loading, setLoading] = useState(true);
-  const [adding, setAdding] = useState(false);
+  const [loading, setLoading] =
+    useState(true);
+
+  const [adding, setAdding] =
+    useState(false);
+
   const [deletingId, setDeletingId] =
     useState('');
 
@@ -61,9 +73,11 @@ export default function ProductsPage() {
   const fetchCategories = async () => {
     try {
       const res = await api.get('/categories');
+
       setCategories(res.data);
     } catch (error) {
       console.log(error);
+
       alert('Failed to load categories');
     }
   };
@@ -84,7 +98,9 @@ export default function ProductsPage() {
 
       setImage(res.data.url);
 
-      alert('Image Uploaded Successfully');
+      alert(
+        'Image Uploaded Successfully',
+      );
     } catch (error: any) {
       console.log(error.response?.data);
 
@@ -146,7 +162,9 @@ export default function ProductsPage() {
 
       await fetchProducts();
 
-      alert('Product Added Successfully');
+      alert(
+        'Product Added Successfully',
+      );
     } catch (error: any) {
       console.log(error.response?.data);
 
@@ -160,7 +178,9 @@ export default function ProductsPage() {
   };
 
   // Delete Product
-  const deleteProduct = async (id: string) => {
+  const deleteProduct = async (
+    id: string,
+  ) => {
     try {
       setDeletingId(id);
 
@@ -174,7 +194,9 @@ export default function ProductsPage() {
 
       await fetchProducts();
 
-      alert('Product Deleted Successfully');
+      alert(
+        'Product Deleted Successfully',
+      );
     } catch (error: any) {
       console.log(error.response?.data);
 
@@ -190,8 +212,13 @@ export default function ProductsPage() {
   // Start Edit
   const startEdit = (product: any) => {
     setEditingId(product._id);
+
     setEditName(product.name);
-    setEditPrice(product.price);
+
+    setEditPrice(
+      String(product.price),
+    );
+
     setEditCategory(
       product.category?._id || '',
     );
@@ -226,13 +253,18 @@ export default function ProductsPage() {
       );
 
       setEditingId('');
+
       setEditName('');
+
       setEditPrice('');
+
       setEditCategory('');
 
       await fetchProducts();
 
-      alert('Product Updated Successfully');
+      alert(
+        'Product Updated Successfully',
+      );
     } catch (error: any) {
       console.log(error.response?.data);
 
@@ -296,7 +328,7 @@ export default function ProductsPage() {
         </h1>
       </div>
 
-      {/* Add Product Card */}
+      {/* Add Product */}
       <div
         style={{
           background: '#ffffff',
@@ -308,17 +340,8 @@ export default function ProductsPage() {
           maxWidth: '550px',
         }}
       >
-        <h2
-          style={{
-            marginTop: 0,
-            marginBottom: '20px',
-            color: '#111827',
-          }}
-        >
-          Add New Product
-        </h2>
+        <h2>Add New Product</h2>
 
-        {/* Name */}
         <input
           type="text"
           placeholder="Product Name"
@@ -330,15 +353,9 @@ export default function ProductsPage() {
             width: '100%',
             padding: '14px',
             marginBottom: '16px',
-            borderRadius: '14px',
-            border: '1px solid #d1d5db',
-            fontSize: '15px',
-            color: '#111827',
-            backgroundColor: '#ffffff',
           }}
         />
 
-        {/* Price */}
         <input
           type="number"
           placeholder="Product Price"
@@ -350,15 +367,9 @@ export default function ProductsPage() {
             width: '100%',
             padding: '14px',
             marginBottom: '16px',
-            borderRadius: '14px',
-            border: '1px solid #d1d5db',
-            fontSize: '15px',
-            color: '#111827',
-            backgroundColor: '#ffffff',
           }}
         />
 
-        {/* Category */}
         <select
           value={category}
           onChange={(e) =>
@@ -368,11 +379,6 @@ export default function ProductsPage() {
             width: '100%',
             padding: '14px',
             marginBottom: '16px',
-            borderRadius: '14px',
-            border: '1px solid #d1d5db',
-            fontSize: '15px',
-            color: '#111827',
-            backgroundColor: '#ffffff',
           }}
         >
           <option value="">
@@ -380,13 +386,15 @@ export default function ProductsPage() {
           </option>
 
           {categories.map((c: any) => (
-            <option key={c._id} value={c._id}>
+            <option
+              key={c._id}
+              value={c._id}
+            >
               {c.name}
             </option>
           ))}
         </select>
 
-        {/* Upload Image */}
         <input
           type="file"
           onChange={(e) => {
@@ -398,11 +406,9 @@ export default function ProductsPage() {
           }}
           style={{
             marginBottom: '20px',
-            color: '#111827',
           }}
         />
 
-        {/* Preview */}
         {image && (
           <img
             src={image}
@@ -413,12 +419,10 @@ export default function ProductsPage() {
               objectFit: 'cover',
               borderRadius: '16px',
               marginBottom: '20px',
-              border: '1px solid #e5e7eb',
             }}
           />
         )}
 
-        {/* Add Button */}
         <button
           onClick={addProduct}
           disabled={adding || uploading}
@@ -427,49 +431,27 @@ export default function ProductsPage() {
             padding: '15px',
             border: 'none',
             borderRadius: '14px',
-            background:
-              adding || uploading
-                ? '#93c5fd'
-                : '#2563eb',
+            background: '#2563eb',
             color: '#ffffff',
             fontSize: '16px',
             fontWeight: 700,
-            cursor:
-              adding || uploading
-                ? 'not-allowed'
-                : 'pointer',
+            cursor: 'pointer',
           }}
         >
           {uploading
-            ? 'Uploading Image...'
+            ? 'Uploading...'
             : adding
-            ? 'Adding Product...'
-            : 'Add Products'}
+            ? 'Adding...'
+            : 'Add Product'}
         </button>
       </div>
 
       {/* Product List */}
       <div>
-        <h2
-          style={{
-            marginBottom: '20px',
-            color: '#111827',
-          }}
-        >
-          Product List
-        </h2>
+        <h2>Product List</h2>
 
         {products.length === 0 ? (
-          <div
-            style={{
-              background: '#ffffff',
-              padding: '20px',
-              borderRadius: '14px',
-              color: '#6b7280',
-            }}
-          >
-            No products found
-          </div>
+          <div>No products found</div>
         ) : (
           products.map((p: any) => (
             <div
@@ -483,89 +465,218 @@ export default function ProductsPage() {
                   '0 5px 20px rgba(0,0,0,0.05)',
               }}
             >
-              {/* Product Image */}
-              {p.image && (
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  style={{
-                    width: '120px',
-                    height: '120px',
-                    objectFit: 'cover',
-                    borderRadius: '14px',
-                    marginBottom: '15px',
-                  }}
-                />
+              {editingId === p._id ? (
+                <>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) =>
+                      setEditName(
+                        e.target.value,
+                      )
+                    }
+                    placeholder="Product Name"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      marginBottom: '12px',
+                    }}
+                  />
+
+                  <input
+                    type="number"
+                    value={editPrice}
+                    onChange={(e) =>
+                      setEditPrice(
+                        e.target.value,
+                      )
+                    }
+                    placeholder="Price"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      marginBottom: '12px',
+                    }}
+                  />
+
+                  <select
+                    value={editCategory}
+                    onChange={(e) =>
+                      setEditCategory(
+                        e.target.value,
+                      )
+                    }
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      marginBottom: '15px',
+                    }}
+                  >
+                    <option value="">
+                      Select Category
+                    </option>
+
+                    {categories.map(
+                      (c: any) => (
+                        <option
+                          key={c._id}
+                          value={c._id}
+                        >
+                          {c.name}
+                        </option>
+                      ),
+                    )}
+                  </select>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '10px',
+                    }}
+                  >
+                    <button
+                      onClick={
+                        updateProduct
+                      }
+                      style={{
+                        padding:
+                          '10px 18px',
+                        border: 'none',
+                        borderRadius:
+                          '10px',
+                        background:
+                          '#16a34a',
+                        color:
+                          '#ffffff',
+                        cursor:
+                          'pointer',
+                      }}
+                    >
+                      Save
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setEditingId(
+                          '',
+                        );
+
+                        setEditName(
+                          '',
+                        );
+
+                        setEditPrice(
+                          '',
+                        );
+
+                        setEditCategory(
+                          '',
+                        );
+                      }}
+                      style={{
+                        padding:
+                          '10px 18px',
+                        border: 'none',
+                        borderRadius:
+                          '10px',
+                        background:
+                          '#6b7280',
+                        color:
+                          '#ffffff',
+                        cursor:
+                          'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {p.image && (
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      style={{
+                        width: '120px',
+                        height: '120px',
+                        objectFit:
+                          'cover',
+                        borderRadius:
+                          '14px',
+                        marginBottom:
+                          '15px',
+                      }}
+                    />
+                  )}
+
+                  <h3>{p.name}</h3>
+
+                  <p>
+                    Price: ৳ {p.price}
+                  </p>
+
+                  <p>
+                    Category:{' '}
+                    {p.category?.name ||
+                      'No Category'}
+                  </p>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '10px',
+                    }}
+                  >
+                    <button
+                      onClick={() =>
+                        startEdit(p)
+                      }
+                      style={{
+                        padding:
+                          '10px 18px',
+                        border: 'none',
+                        borderRadius:
+                          '10px',
+                        background:
+                          '#2563eb',
+                        color:
+                          '#ffffff',
+                        cursor:
+                          'pointer',
+                      }}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        deleteProduct(
+                          p._id,
+                        )
+                      }
+                      style={{
+                        padding:
+                          '10px 18px',
+                        border: 'none',
+                        borderRadius:
+                          '10px',
+                        background:
+                          '#dc2626',
+                        color:
+                          '#ffffff',
+                        cursor:
+                          'pointer',
+                      }}
+                    >
+                      {deletingId ===
+                      p._id
+                        ? 'Deleting...'
+                        : 'Delete'}
+                    </button>
+                  </div>
+                </>
               )}
-
-              <h3
-                style={{
-                  margin: 0,
-                  color: '#111827',
-                  marginBottom: '10px',
-                }}
-              >
-                {p.name}
-              </h3>
-
-              <p
-                style={{
-                  color: '#374151',
-                  marginBottom: '8px',
-                }}
-              >
-                Price: ৳ {p.price}
-              </p>
-
-              <p
-                style={{
-                  color: '#6b7280',
-                  marginBottom: '15px',
-                }}
-              >
-                Category:{' '}
-                {p.category?.name ||
-                  'No Category'}
-              </p>
-
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '10px',
-                }}
-              >
-                <button
-                  onClick={() =>
-                    startEdit(p)
-                  }
-                  style={{
-                    padding: '10px 18px',
-                    border: 'none',
-                    borderRadius: '10px',
-                    background: '#2563eb',
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() =>
-                    deleteProduct(p._id)
-                  }
-                  style={{
-                    padding: '10px 18px',
-                    border: 'none',
-                    borderRadius: '10px',
-                    background: '#dc2626',
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
             </div>
           ))
         )}
