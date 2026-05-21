@@ -23,8 +23,23 @@ export default function LoginPage() {
         password,
       });
 
-      Cookies.set('token', res.data.access_token);
+      // API response থেকে data নেওয়া
+      const { access_token, user } = res.data;
 
+      // শুধু admin login করতে পারবে
+      if (user?.role !== 'admin') {
+        alert('Only admin can login');
+
+        // যদি token আগে save হয়ে থাকে remove করে দিবে
+        Cookies.remove('token');
+
+        return;
+      }
+
+      // token save
+      Cookies.set('token', access_token);
+
+      // dashboard এ redirect
       router.push('/dashboard');
     } catch (err) {
       alert('Invalid email or password');
