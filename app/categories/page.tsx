@@ -10,10 +10,13 @@ export default function CategoriesPage() {
   const token = Cookies.get('token');
 
   const [categories, setCategories] = useState<any[]>([]);
+
   const [name, setName] = useState('');
+  const [image, setImage] = useState<File | null>(null);
 
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [editImage, setEditImage] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
@@ -41,21 +44,32 @@ export default function CategoriesPage() {
     }
   };
 
+  /* ================= ADD CATEGORY ================= */
+
   const addCategory = async () => {
     if (!name) return alert('Enter category name');
 
     try {
       setAdding(true);
 
-      await api.post(
-        '/categories',
-        { name },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const formData = new FormData();
+
+      formData.append('name', name);
+
+      if (image) {
+        formData.append('image', image);
+      }
+
+      await api.post('/categories', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       setName('');
+      setImage(null);
+
       fetchCategories();
     } catch (error: any) {
       console.log(error.response?.data);
@@ -65,6 +79,8 @@ export default function CategoriesPage() {
     }
   };
 
+  /* ================= DELETE ================= */
+
   const deleteCategory = async (id: string) => {
     if (!confirm('Are you sure?')) return;
 
@@ -72,7 +88,9 @@ export default function CategoriesPage() {
       setDeletingId(id);
 
       await api.delete(`/categories/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       setCategories((prev) => prev.filter((c) => c._id !== id));
@@ -84,6 +102,8 @@ export default function CategoriesPage() {
     }
   };
 
+  /* ================= EDIT ================= */
+
   const startEdit = (c: any) => {
     setEditId(c._id);
     setEditName(c.name);
@@ -92,6 +112,7 @@ export default function CategoriesPage() {
   const cancelEdit = () => {
     setEditId(null);
     setEditName('');
+    setEditImage(null);
   };
 
   const updateCategory = async (id: string) => {
@@ -100,21 +121,34 @@ export default function CategoriesPage() {
     try {
       setUpdating(true);
 
+      const formData = new FormData();
+
+      formData.append('name', editName);
+
+      if (editImage) {
+        formData.append('image', editImage);
+      }
+
       const res = await api.patch(
         `/categories/${id}`,
-        { name: editName },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
 
-      console.log('Updated:', res.data);
-
       setCategories((prev) =>
         prev.map((c) =>
-          c._id === id ? { ...c, name: editName } : c
+          c._id === id
+            ? {
+                ...c,
+                name: res.data.name,
+                image: res.data.image,
+              }
+            : c
         )
       );
 
@@ -127,6 +161,8 @@ export default function CategoriesPage() {
     }
   };
 
+  /* ================= LOADING ================= */
+
   if (loading) {
     return <div style={styles.loading}>Loading Categories...</div>;
   }
@@ -135,13 +171,25 @@ export default function CategoriesPage() {
     <div style={styles.page}>
       <h1 style={styles.title}>Categories Management</h1>
 
-      {/* ADD CATEGORY */}
+      {/* ================= ADD CATEGORY ================= */}
+
       <div style={styles.card}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter category name"
           style={styles.input}
+        />
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files?.[0]) {
+              setImage(e.target.files[0]);
+            }
+          }}
+          style={styles.fileInput}
         />
 
         <button
@@ -153,21 +201,45 @@ export default function CategoriesPage() {
         </button>
       </div>
 
-      {/* LIST */}
+      {/* ================= CATEGORY LIST ================= */}
+
       <div style={styles.list}>
         {categories.map((c) => (
           <div key={c._id} style={styles.item}>
-            
-            <div style={{ flex: 1 }}>
-              {editId === c._id ? (
-                <input
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  style={styles.editInput}
+            <div style={styles.left}>
+              
+              {c.image && (
+                <img
+                  src={c.image}
+                  alt={c.name}
+                  style={styles.image}
                 />
-              ) : (
-                <span style={styles.name}>{c.name}</span>
               )}
+
+              <div style={{ flex: 1 }}>
+                {editId === c._id ? (
+                  <>
+                    <input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      style={styles.editInput}
+                    />
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          setEditImage(e.target.files[0]);
+                        }
+                      }}
+                      style={styles.fileInput}
+                    />
+                  </>
+                ) : (
+                  <span style={styles.name}>{c.name}</span>
+                )}
+              </div>
             </div>
 
             <div style={styles.actions}>
@@ -178,7 +250,7 @@ export default function CategoriesPage() {
                     disabled={updating}
                     style={styles.saveBtn}
                   >
-                    Save
+                    {updating ? 'Saving...' : 'Save'}
                   </button>
 
                   <button
@@ -247,9 +319,14 @@ const styles: any = {
     border: '1px solid #ddd',
     marginBottom: 10,
     outline: 'none',
-    color: '#111827',        // ✅ FIXED TEXT COLOR
+    color: '#111827',
     backgroundColor: '#fff',
     fontSize: 15,
+  },
+
+  fileInput: {
+    marginBottom: 12,
+    color: '#111827',
   },
 
   addBtn: {
@@ -276,7 +353,23 @@ const styles: any = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
     boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
+  },
+
+  left: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    objectFit: 'cover',
+    border: '1px solid #ddd',
   },
 
   name: {
@@ -295,10 +388,11 @@ const styles: any = {
     padding: 10,
     borderRadius: 8,
     border: '1px solid #ccc',
-    color: '#111827',        // ✅ FIXED TEXT COLOR
+    color: '#111827',
     backgroundColor: '#fff',
     fontSize: 15,
     outline: 'none',
+    marginBottom: 10,
   },
 
   editBtn: {
