@@ -48,7 +48,7 @@ export default function LoginPage() {
         style={{
           width: '100%',
           maxWidth: '400px',
-          background: '#fff',
+          background: '#ffffff',
           padding: '35px',
           borderRadius: '16px',
           boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
@@ -59,6 +59,8 @@ export default function LoginPage() {
             textAlign: 'center',
             marginBottom: '10px',
             color: '#111827',
+            fontSize: '28px',
+            fontWeight: 'bold',
           }}
         >
           Admin Login
@@ -102,6 +104,8 @@ export default function LoginPage() {
               outline: 'none',
               fontSize: '15px',
               boxSizing: 'border-box',
+              color: '#111827',
+              backgroundColor: '#ffffff',
             }}
           />
         </div>
@@ -133,6 +137,8 @@ export default function LoginPage() {
               outline: 'none',
               fontSize: '15px',
               boxSizing: 'border-box',
+              color: '#111827',
+              backgroundColor: '#ffffff',
             }}
           />
         </div>
@@ -147,7 +153,7 @@ export default function LoginPage() {
             border: 'none',
             borderRadius: '10px',
             background: loading ? '#93c5fd' : '#2563eb',
-            color: '#fff',
+            color: '#ffffff',
             fontSize: '16px',
             fontWeight: 600,
             cursor: loading ? 'not-allowed' : 'pointer',
