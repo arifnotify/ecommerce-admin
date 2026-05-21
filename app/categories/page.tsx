@@ -29,19 +29,22 @@ export default function CategoriesPage() {
     fetchCategories();
   }, []);
 
+  // GET ALL
   const fetchCategories = async () => {
     try {
       const res = await api.get('/categories');
       setCategories(res.data);
-    } catch {
+    } catch (error: any) {
+      console.log(error.response?.data);
       alert('Failed to load categories');
     } finally {
       setLoading(false);
     }
   };
 
+  // ADD
   const addCategory = async () => {
-    if (!name) return;
+    if (!name) return alert('Enter category name');
 
     try {
       setAdding(true);
@@ -49,20 +52,24 @@ export default function CategoriesPage() {
       await api.post(
         '/categories',
         { name },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       setName('');
       fetchCategories();
-    } catch {
-      alert('Failed to add category');
+    } catch (error: any) {
+      console.log(error.response?.data);
+      alert(error.response?.data?.message || 'Add failed');
     } finally {
       setAdding(false);
     }
   };
 
+  // DELETE
   const deleteCategory = async (id: string) => {
-    if (!confirm('Delete this category?')) return;
+    if (!confirm('Are you sure?')) return;
 
     try {
       setDeletingId(id);
@@ -72,34 +79,44 @@ export default function CategoriesPage() {
       });
 
       setCategories((prev) => prev.filter((c) => c._id !== id));
-    } catch {
-      alert('Delete failed');
+    } catch (error: any) {
+      console.log(error.response?.data);
+      alert(error.response?.data?.message || 'Delete failed');
     } finally {
       setDeletingId(null);
     }
   };
 
+  // START EDIT
   const startEdit = (c: any) => {
     setEditId(c._id);
     setEditName(c.name);
   };
 
+  // CANCEL EDIT
   const cancelEdit = () => {
     setEditId(null);
     setEditName('');
   };
 
+  // UPDATE (FIXED)
   const updateCategory = async (id: string) => {
-    if (!editName) return;
+    if (!editName) return alert('Name required');
 
     try {
       setUpdating(true);
 
-      await api.put(
+      const res = await api.patch(
         `/categories/${id}`,
-        { name: editName },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { name: editName }, // backend expects { name }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+
+      console.log('Updated:', res.data);
 
       setCategories((prev) =>
         prev.map((c) =>
@@ -108,8 +125,9 @@ export default function CategoriesPage() {
       );
 
       cancelEdit();
-    } catch {
-      alert('Update failed');
+    } catch (error: any) {
+      console.log(error.response?.data);
+      alert(error.response?.data?.message || 'Update failed');
     } finally {
       setUpdating(false);
     }
@@ -118,7 +136,7 @@ export default function CategoriesPage() {
   if (loading) {
     return (
       <div style={styles.loading}>
-        Loading Categories...
+        Loading...
       </div>
     );
   }
@@ -126,34 +144,28 @@ export default function CategoriesPage() {
   return (
     <div style={styles.page}>
       
-      {/* HEADER */}
-      <div style={styles.header}>
-        <h1 style={styles.title}>Categories</h1>
-        <p style={styles.subtitle}>Manage your product categories</p>
-      </div>
+      <h1 style={styles.title}>Categories Management</h1>
 
-      {/* ADD CARD */}
+      {/* ADD */}
       <div style={styles.card}>
-        <h2 style={styles.cardTitle}>Add New Category</h2>
-
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Enter category name"
+          placeholder="New category name"
           style={styles.input}
         />
 
         <button
           onClick={addCategory}
           disabled={adding}
-          style={styles.primaryBtn}
+          style={styles.addBtn}
         >
           {adding ? 'Adding...' : 'Add Category'}
         </button>
       </div>
 
       {/* LIST */}
-      <div style={styles.listContainer}>
+      <div style={styles.list}>
         {categories.map((c) => (
           <div key={c._id} style={styles.item}>
             
@@ -165,7 +177,7 @@ export default function CategoriesPage() {
                   style={styles.editInput}
                 />
               ) : (
-                <h3 style={styles.itemText}>{c.name}</h3>
+                <span style={styles.name}>{c.name}</span>
               )}
             </div>
 
@@ -180,10 +192,7 @@ export default function CategoriesPage() {
                     Save
                   </button>
 
-                  <button
-                    onClick={cancelEdit}
-                    style={styles.cancelBtn}
-                  >
+                  <button onClick={cancelEdit} style={styles.cancelBtn}>
                     Cancel
                   </button>
                 </>
@@ -213,66 +222,49 @@ export default function CategoriesPage() {
   );
 }
 
-/* ================= UI STYLES ================= */
+/* ================= STYLES ================= */
 
 const styles: any = {
   page: {
     minHeight: '100vh',
-    background: '#f5f7fb',
+    background: '#f4f7fb',
     padding: '40px',
     fontFamily: 'sans-serif',
   },
 
-  header: {
-    marginBottom: 25,
-  },
-
   title: {
-    fontSize: 32,
-    margin: 0,
+    fontSize: 30,
+    marginBottom: 20,
     color: '#111827',
-  },
-
-  subtitle: {
-    marginTop: 6,
-    color: '#6b7280',
   },
 
   card: {
     background: '#fff',
-    padding: 25,
-    borderRadius: 16,
-    boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
-    marginBottom: 30,
+    padding: 20,
+    borderRadius: 14,
     maxWidth: 500,
-  },
-
-  cardTitle: {
-    marginBottom: 15,
-    color: '#111827',
+    marginBottom: 25,
   },
 
   input: {
     width: '100%',
     padding: 12,
     borderRadius: 10,
-    border: '1px solid #e5e7eb',
-    marginBottom: 15,
-    outline: 'none',
+    border: '1px solid #ddd',
+    marginBottom: 10,
   },
 
-  primaryBtn: {
+  addBtn: {
     width: '100%',
     padding: 12,
     background: '#2563eb',
     color: '#fff',
     border: 'none',
     borderRadius: 10,
-    fontWeight: 600,
     cursor: 'pointer',
   },
 
-  listContainer: {
+  list: {
     display: 'flex',
     flexDirection: 'column',
     gap: 12,
@@ -280,17 +272,16 @@ const styles: any = {
 
   item: {
     background: '#fff',
-    padding: 18,
-    borderRadius: 14,
+    padding: 15,
+    borderRadius: 12,
     display: 'flex',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
+    alignItems: 'center',
   },
 
-  itemText: {
-    margin: 0,
-    color: '#111827',
+  name: {
+    fontSize: 16,
+    fontWeight: 500,
   },
 
   actions: {
@@ -302,14 +293,14 @@ const styles: any = {
     width: '100%',
     padding: 10,
     borderRadius: 8,
-    border: '1px solid #d1d5db',
+    border: '1px solid #ccc',
   },
 
   editBtn: {
     background: '#f59e0b',
     color: '#fff',
     border: 'none',
-    padding: '8px 12px',
+    padding: '6px 10px',
     borderRadius: 8,
     cursor: 'pointer',
   },
@@ -318,7 +309,7 @@ const styles: any = {
     background: '#ef4444',
     color: '#fff',
     border: 'none',
-    padding: '8px 12px',
+    padding: '6px 10px',
     borderRadius: 8,
     cursor: 'pointer',
   },
@@ -327,7 +318,7 @@ const styles: any = {
     background: '#10b981',
     color: '#fff',
     border: 'none',
-    padding: '8px 12px',
+    padding: '6px 10px',
     borderRadius: 8,
     cursor: 'pointer',
   },
@@ -336,7 +327,7 @@ const styles: any = {
     background: '#6b7280',
     color: '#fff',
     border: 'none',
-    padding: '8px 12px',
+    padding: '6px 10px',
     borderRadius: 8,
     cursor: 'pointer',
   },
@@ -347,7 +338,6 @@ const styles: any = {
     justifyContent: 'center',
     alignItems: 'center',
     fontSize: 20,
-    fontWeight: 600,
     color: '#2563eb',
   },
 };
