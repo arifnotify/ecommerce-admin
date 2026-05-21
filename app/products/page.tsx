@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -443,7 +444,7 @@ export default function ProductsPage() {
             ? 'Uploading Image...'
             : adding
             ? 'Adding Product...'
-            : 'Add Product'}
+            : 'Add Products'}
         </button>
       </div>
 
