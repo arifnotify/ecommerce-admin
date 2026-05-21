@@ -529,277 +529,336 @@ export default function ProductsPage() {
           Product List
         </h2>
 
-        {products.length === 0 ? (
-          <div>No products found</div>
-        ) : (
-          products.map((p: any) => (
-            <div
-              key={p._id}
-              style={{
-                background: '#ffffff',
-                padding: '20px',
-                borderRadius: '18px',
-                marginBottom: '18px',
-                boxShadow:
-                  '0 5px 20px rgba(0,0,0,0.05)',
-              }}
-            >
-              {editingId === p._id ? (
-                <>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) =>
-                      setEditName(
-                        e.target.value,
-                      )
-                    }
-                    placeholder="Product Name"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      marginBottom: '12px',
-                    }}
-                  />
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '20px',
+          }}
+        >
+          {products.length === 0 ? (
+            <div>No products found</div>
+          ) : (
+            products.map((p: any) => (
+              <div
+                key={p._id}
+                style={{
+                  background: '#ffffff',
+                  padding: '20px',
+                  borderRadius: '18px',
+                  boxShadow:
+                    '0 5px 20px rgba(0,0,0,0.05)',
+                  width: '300px',
+                  minHeight: '420px',
+                  maxHeight: '420px',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent:
+                    'space-between',
+                }}
+              >
+                {editingId === p._id ? (
+                  <>
+                    <div>
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) =>
+                          setEditName(
+                            e.target.value,
+                          )
+                        }
+                        placeholder="Product Name"
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          marginBottom:
+                            '12px',
+                        }}
+                      />
 
-                  <input
-                    type="number"
-                    value={editPrice}
-                    onChange={(e) =>
-                      setEditPrice(
-                        e.target.value,
-                      )
-                    }
-                    placeholder="Price"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      marginBottom: '12px',
-                    }}
-                  />
+                      <input
+                        type="number"
+                        value={editPrice}
+                        onChange={(e) =>
+                          setEditPrice(
+                            e.target.value,
+                          )
+                        }
+                        placeholder="Price"
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          marginBottom:
+                            '12px',
+                        }}
+                      />
 
-                  <select
-                    value={editCategory}
-                    onChange={(e) =>
-                      setEditCategory(
-                        e.target.value,
-                      )
-                    }
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      marginBottom: '15px',
-                    }}
-                  >
-                    <option value="">
-                      Select Category
-                    </option>
-
-                    {categories.map(
-                      (c: any) => (
-                        <option
-                          key={c._id}
-                          value={c._id}
-                        >
-                          {c.name}
+                      <select
+                        value={
+                          editCategory
+                        }
+                        onChange={(e) =>
+                          setEditCategory(
+                            e.target
+                              .value,
+                          )
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          marginBottom:
+                            '15px',
+                        }}
+                      >
+                        <option value="">
+                          Select Category
                         </option>
-                      ),
-                    )}
-                  </select>
 
-                  <input
-                    type="file"
-                    onChange={(e) => {
-                      if (
-                        e.target.files
-                      ) {
-                        uploadEditImage(
-                          e.target
-                            .files[0],
-                        );
-                      }
-                    }}
-                    style={{
-                      marginBottom:
-                        '15px',
-                    }}
-                  />
+                        {categories.map(
+                          (c: any) => (
+                            <option
+                              key={
+                                c._id
+                              }
+                              value={
+                                c._id
+                              }
+                            >
+                              {c.name}
+                            </option>
+                          ),
+                        )}
+                      </select>
 
-                  {editImage && (
-                    <img
-                      src={editImage}
-                      alt="preview"
+                      <input
+                        type="file"
+                        onChange={(
+                          e,
+                        ) => {
+                          if (
+                            e.target
+                              .files
+                          ) {
+                            uploadEditImage(
+                              e.target
+                                .files[0],
+                            );
+                          }
+                        }}
+                        style={{
+                          marginBottom:
+                            '15px',
+                        }}
+                      />
+
+                      {editImage && (
+                        <img
+                          src={
+                            editImage
+                          }
+                          alt="preview"
+                          style={{
+                            width:
+                              '100%',
+                            height:
+                              '160px',
+                            objectFit:
+                              'cover',
+                            borderRadius:
+                              '12px',
+                            marginBottom:
+                              '15px',
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    <div
                       style={{
-                        width: '140px',
-                        height: '140px',
-                        objectFit:
-                          'cover',
-                        borderRadius:
-                          '12px',
-                        marginBottom:
-                          '15px',
-                        border:
-                          '1px solid #ddd',
-                      }}
-                    />
-                  )}
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '10px',
-                    }}
-                  >
-                    <button
-                      onClick={
-                        updateProduct
-                      }
-                      style={{
-                        padding:
-                          '10px 18px',
-                        border: 'none',
-                        borderRadius:
-                          '10px',
-                        background:
-                          '#16a34a',
-                        color:
-                          '#ffffff',
-                        cursor:
-                          'pointer',
+                        display: 'flex',
+                        gap: '10px',
                       }}
                     >
-                      Save
-                    </button>
+                      <button
+                        onClick={
+                          updateProduct
+                        }
+                        style={{
+                          flex: 1,
+                          padding:
+                            '10px',
+                          border:
+                            'none',
+                          borderRadius:
+                            '10px',
+                          background:
+                            '#16a34a',
+                          color:
+                            '#ffffff',
+                          cursor:
+                            'pointer',
+                        }}
+                      >
+                        Save
+                      </button>
 
-                    <button
-                      onClick={() => {
-                        setEditingId(
-                          '',
-                        );
+                      <button
+                        onClick={() => {
+                          setEditingId(
+                            '',
+                          );
 
-                        setEditName(
-                          '',
-                        );
+                          setEditName(
+                            '',
+                          );
 
-                        setEditPrice(
-                          '',
-                        );
+                          setEditPrice(
+                            '',
+                          );
 
-                        setEditCategory(
-                          '',
-                        );
+                          setEditCategory(
+                            '',
+                          );
 
-                        setEditImage(
-                          '',
-                        );
-                      }}
+                          setEditImage(
+                            '',
+                          );
+                        }}
+                        style={{
+                          flex: 1,
+                          padding:
+                            '10px',
+                          border:
+                            'none',
+                          borderRadius:
+                            '10px',
+                          background:
+                            '#6b7280',
+                          color:
+                            '#ffffff',
+                          cursor:
+                            'pointer',
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      {p.image && (
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          style={{
+                            width:
+                              '100%',
+                            height:
+                              '180px',
+                            objectFit:
+                              'cover',
+                            borderRadius:
+                              '14px',
+                            marginBottom:
+                              '15px',
+                          }}
+                        />
+                      )}
+
+                      <h3
+                        style={{
+                          overflow:
+                            'hidden',
+                          textOverflow:
+                            'ellipsis',
+                          whiteSpace:
+                            'nowrap',
+                          marginBottom:
+                            '10px',
+                        }}
+                      >
+                        {p.name}
+                      </h3>
+
+                      <p>
+                        Price: ৳{' '}
+                        {p.price}
+                      </p>
+
+                      <p>
+                        Category:{' '}
+                        {p.category
+                          ?.name ||
+                          'No Category'}
+                      </p>
+                    </div>
+
+                    <div
                       style={{
-                        padding:
-                          '10px 18px',
-                        border: 'none',
-                        borderRadius:
-                          '10px',
-                        background:
-                          '#6b7280',
-                        color:
-                          '#ffffff',
-                        cursor:
-                          'pointer',
+                        display: 'flex',
+                        gap: '10px',
                       }}
                     >
-                      Cancel
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {p.image && (
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      style={{
-                        width: '120px',
-                        height: '120px',
-                        objectFit:
-                          'cover',
-                        borderRadius:
-                          '14px',
-                        marginBottom:
-                          '15px',
-                      }}
-                    />
-                  )}
+                      <button
+                        onClick={() =>
+                          startEdit(p)
+                        }
+                        style={{
+                          flex: 1,
+                          padding:
+                            '10px',
+                          border:
+                            'none',
+                          borderRadius:
+                            '10px',
+                          background:
+                            '#2563eb',
+                          color:
+                            '#ffffff',
+                          cursor:
+                            'pointer',
+                        }}
+                      >
+                        Edit
+                      </button>
 
-                  <h3>{p.name}</h3>
-
-                  <p>
-                    Price: ৳ {p.price}
-                  </p>
-
-                  <p>
-                    Category:{' '}
-                    {p.category?.name ||
-                      'No Category'}
-                  </p>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '10px',
-                    }}
-                  >
-                    <button
-                      onClick={() =>
-                        startEdit(p)
-                      }
-                      style={{
-                        padding:
-                          '10px 18px',
-                        border: 'none',
-                        borderRadius:
-                          '10px',
-                        background:
-                          '#2563eb',
-                        color:
-                          '#ffffff',
-                        cursor:
-                          'pointer',
-                      }}
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        deleteProduct(
-                          p._id,
-                        )
-                      }
-                      style={{
-                        padding:
-                          '10px 18px',
-                        border: 'none',
-                        borderRadius:
-                          '10px',
-                        background:
-                          '#dc2626',
-                        color:
-                          '#ffffff',
-                        cursor:
-                          'pointer',
-                      }}
-                    >
-                      {deletingId ===
-                      p._id
-                        ? 'Deleting...'
-                        : 'Delete'}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          ))
-        )}
+                      <button
+                        onClick={() =>
+                          deleteProduct(
+                            p._id,
+                          )
+                        }
+                        style={{
+                          flex: 1,
+                          padding:
+                            '10px',
+                          border:
+                            'none',
+                          borderRadius:
+                            '10px',
+                          background:
+                            '#dc2626',
+                          color:
+                            '#ffffff',
+                          cursor:
+                            'pointer',
+                        }}
+                      >
+                        {deletingId ===
+                        p._id
+                          ? 'Deleting...'
+                          : 'Delete'}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
