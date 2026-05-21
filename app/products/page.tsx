@@ -39,6 +39,9 @@ export default function ProductsPage() {
   const [editCategory, setEditCategory] =
     useState('');
 
+  const [editImage, setEditImage] =
+    useState('');
+
   // Loading State
   const [loading, setLoading] =
     useState(true);
@@ -63,6 +66,7 @@ export default function ProductsPage() {
       setProducts(res.data);
     } catch (error) {
       console.log(error);
+
       alert('Failed to load products');
     } finally {
       setLoading(false);
@@ -82,7 +86,7 @@ export default function ProductsPage() {
     }
   };
 
-  // Upload Image
+  // Upload Add Image
   const uploadImage = async (file: File) => {
     try {
       setUploading(true);
@@ -105,6 +109,36 @@ export default function ProductsPage() {
       console.log(error.response?.data);
 
       alert('Image upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Upload Edit Image
+  const uploadEditImage = async (
+    file: File,
+  ) => {
+    try {
+      setUploading(true);
+
+      const formData = new FormData();
+
+      formData.append('file', file);
+
+      const res = await api.post(
+        '/upload',
+        formData,
+      );
+
+      setEditImage(res.data.url);
+
+      alert(
+        'Edit Image Uploaded Successfully',
+      );
+    } catch (error: any) {
+      console.log(error.response?.data);
+
+      alert('Edit image upload failed');
     } finally {
       setUploading(false);
     }
@@ -222,6 +256,8 @@ export default function ProductsPage() {
     setEditCategory(
       product.category?._id || '',
     );
+
+    setEditImage(product.image || '');
   };
 
   // Update Product
@@ -244,6 +280,7 @@ export default function ProductsPage() {
           name: editName,
           price: Number(editPrice),
           category: editCategory,
+          image: editImage,
         },
         {
           headers: {
@@ -259,6 +296,8 @@ export default function ProductsPage() {
       setEditPrice('');
 
       setEditCategory('');
+
+      setEditImage('');
 
       await fetchProducts();
 
@@ -431,24 +470,36 @@ export default function ProductsPage() {
             padding: '15px',
             border: 'none',
             borderRadius: '14px',
-            background: '#2563eb',
+            background:
+              adding || uploading
+                ? '#93c5fd'
+                : '#2563eb',
             color: '#ffffff',
             fontSize: '16px',
             fontWeight: 700,
-            cursor: 'pointer',
+            cursor:
+              adding || uploading
+                ? 'not-allowed'
+                : 'pointer',
           }}
         >
           {uploading
-            ? 'Uploading...'
+            ? 'Uploading Image...'
             : adding
-            ? 'Adding...'
+            ? 'Adding Product...'
             : 'Add Product'}
         </button>
       </div>
 
       {/* Product List */}
       <div>
-        <h2>Product List</h2>
+        <h2
+          style={{
+            marginBottom: '20px',
+          }}
+        >
+          Product List
+        </h2>
 
         {products.length === 0 ? (
           <div>No products found</div>
@@ -528,6 +579,43 @@ export default function ProductsPage() {
                     )}
                   </select>
 
+                  <input
+                    type="file"
+                    onChange={(e) => {
+                      if (
+                        e.target.files
+                      ) {
+                        uploadEditImage(
+                          e.target
+                            .files[0],
+                        );
+                      }
+                    }}
+                    style={{
+                      marginBottom:
+                        '15px',
+                    }}
+                  />
+
+                  {editImage && (
+                    <img
+                      src={editImage}
+                      alt="preview"
+                      style={{
+                        width: '140px',
+                        height: '140px',
+                        objectFit:
+                          'cover',
+                        borderRadius:
+                          '12px',
+                        marginBottom:
+                          '15px',
+                        border:
+                          '1px solid #ddd',
+                      }}
+                    />
+                  )}
+
                   <div
                     style={{
                       display: 'flex',
@@ -570,6 +658,10 @@ export default function ProductsPage() {
                         );
 
                         setEditCategory(
+                          '',
+                        );
+
+                        setEditImage(
                           '',
                         );
                       }}
