@@ -52,6 +52,15 @@ export default function ProductsPage() {
   const [deletingId, setDeletingId] =
     useState('');
 
+  // Logout
+  const logout = () => {
+    Cookies.remove('token');
+
+    router.push('/');
+
+    alert('Logged out successfully');
+  };
+
   // Fetch Products
   const fetchProducts = async () => {
     try {
@@ -353,6 +362,9 @@ export default function ProductsPage() {
           boxShadow:
             '0 10px 30px rgba(0,0,0,0.08)',
           marginBottom: '30px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
         <h1
@@ -365,6 +377,22 @@ export default function ProductsPage() {
         >
           Products Management
         </h1>
+
+        <button
+          onClick={logout}
+          style={{
+            padding: '12px 20px',
+            border: 'none',
+            borderRadius: '12px',
+            background: '#dc2626',
+            color: '#ffffff',
+            fontSize: '15px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+          }}
+        >
+          Logout
+        </button>
       </div>
 
       {/* Add Product */}
