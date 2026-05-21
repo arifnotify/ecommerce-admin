@@ -14,10 +14,16 @@ export default function ProductsPage() {
   // Categories State
   const [categories, setCategories] = useState<any[]>([]);
 
-  // Form State
+  // Add Product State
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
+
+  // Edit Product State
+  const [editingId, setEditingId] = useState('');
+  const [editName, setEditName] = useState('');
+  const [editPrice, setEditPrice] = useState('');
+  const [editCategory, setEditCategory] = useState('');
 
   // Loading State
   const [loading, setLoading] = useState(true);
@@ -60,7 +66,6 @@ export default function ProductsPage() {
   useEffect(() => {
     const token = Cookies.get('token');
 
-    // যদি token না থাকে login page এ পাঠাবে
     if (!token) {
       router.push('/');
       return;
@@ -96,12 +101,10 @@ export default function ProductsPage() {
         },
       );
 
-      // Clear Inputs
       setName('');
       setPrice('');
       setCategory('');
 
-      // Reload Products
       await fetchProducts();
 
       alert('Product Added Successfully');
@@ -142,6 +145,56 @@ export default function ProductsPage() {
       );
     } finally {
       setDeletingId('');
+    }
+  };
+
+  // Start Edit
+  const startEdit = (product: any) => {
+    setEditingId(product._id);
+    setEditName(product.name);
+    setEditPrice(product.price);
+    setEditCategory(product.category?._id || '');
+  };
+
+  // Update Product
+  const updateProduct = async () => {
+    if (!editName || !editPrice || !editCategory) {
+      alert('Please fill all fields');
+      return;
+    }
+
+    try {
+      const token = Cookies.get('token');
+
+      await api.patch(
+        `/products/${editingId}`,
+        {
+          name: editName,
+          price: Number(editPrice),
+          category: editCategory,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setEditingId('');
+      setEditName('');
+      setEditPrice('');
+      setEditCategory('');
+
+      await fetchProducts();
+
+      alert('Product Updated Successfully');
+    } catch (error: any) {
+      console.log(error.response?.data);
+
+      alert(
+        error.response?.data?.message ||
+          'Failed to update product'
+      );
     }
   };
 
@@ -199,11 +252,11 @@ export default function ProductsPage() {
             color: '#6b7280',
           }}
         >
-          Add, manage and delete products
+          Add, edit and delete products
         </p>
       </div>
 
-      {/* Add Product Card */}
+      {/* Add Product */}
       <div
         style={{
           background: '#ffffff',
@@ -224,7 +277,6 @@ export default function ProductsPage() {
           Add New Product
         </h2>
 
-        {/* Product Name */}
         <input
           type="text"
           placeholder="Product Name"
@@ -237,13 +289,12 @@ export default function ProductsPage() {
             borderRadius: '10px',
             border: '1px solid #d1d5db',
             fontSize: '15px',
-            boxSizing: 'border-box',
             color: '#111827',
             backgroundColor: '#ffffff',
+            boxSizing: 'border-box',
           }}
         />
 
-        {/* Product Price */}
         <input
           type="number"
           placeholder="Product Price"
@@ -256,13 +307,12 @@ export default function ProductsPage() {
             borderRadius: '10px',
             border: '1px solid #d1d5db',
             fontSize: '15px',
-            boxSizing: 'border-box',
             color: '#111827',
             backgroundColor: '#ffffff',
+            boxSizing: 'border-box',
           }}
         />
 
-        {/* Category Select */}
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
@@ -273,9 +323,9 @@ export default function ProductsPage() {
             borderRadius: '10px',
             border: '1px solid #d1d5db',
             fontSize: '15px',
-            boxSizing: 'border-box',
             color: '#111827',
             backgroundColor: '#ffffff',
+            boxSizing: 'border-box',
           }}
         >
           <option value="">Select Category</option>
@@ -287,7 +337,6 @@ export default function ProductsPage() {
           ))}
         </select>
 
-        {/* Add Button */}
         <button
           onClick={addProduct}
           disabled={adding}
@@ -307,7 +356,7 @@ export default function ProductsPage() {
         </button>
       </div>
 
-      {/* Product Table */}
+      {/* Products Table */}
       <div
         style={{
           background: '#ffffff',
@@ -338,43 +387,19 @@ export default function ProductsPage() {
                 background: '#f3f4f6',
               }}
             >
-              <th
-                style={{
-                  padding: '14px',
-                  textAlign: 'left',
-                  color: '#111827',
-                }}
-              >
+              <th style={{ padding: '14px', textAlign: 'left' }}>
                 Name
               </th>
 
-              <th
-                style={{
-                  padding: '14px',
-                  textAlign: 'left',
-                  color: '#111827',
-                }}
-              >
+              <th style={{ padding: '14px', textAlign: 'left' }}>
                 Price
               </th>
 
-              <th
-                style={{
-                  padding: '14px',
-                  textAlign: 'left',
-                  color: '#111827',
-                }}
-              >
+              <th style={{ padding: '14px', textAlign: 'left' }}>
                 Category
               </th>
 
-              <th
-                style={{
-                  padding: '14px',
-                  textAlign: 'left',
-                  color: '#111827',
-                }}
-              >
+              <th style={{ padding: '14px', textAlign: 'left' }}>
                 Action
               </th>
             </tr>
@@ -402,61 +427,169 @@ export default function ProductsPage() {
                     borderBottom: '1px solid #e5e7eb',
                   }}
                 >
-                  <td
-                    style={{
-                      padding: '14px',
-                      color: '#111827',
-                    }}
-                  >
-                    {p.name}
+                  {/* Name */}
+                  <td style={{ padding: '14px' }}>
+                    {editingId === p._id ? (
+                      <input
+                        value={editName}
+                        onChange={(e) =>
+                          setEditName(e.target.value)
+                        }
+                        style={{
+                          padding: '8px',
+                          width: '100%',
+                          borderRadius: '8px',
+                          border: '1px solid #d1d5db',
+                          color: '#111827',
+                        }}
+                      />
+                    ) : (
+                      p.name
+                    )}
                   </td>
 
-                  <td
-                    style={{
-                      padding: '14px',
-                      color: '#111827',
-                    }}
-                  >
-                    ৳ {p.price}
+                  {/* Price */}
+                  <td style={{ padding: '14px' }}>
+                    {editingId === p._id ? (
+                      <input
+                        type="number"
+                        value={editPrice}
+                        onChange={(e) =>
+                          setEditPrice(e.target.value)
+                        }
+                        style={{
+                          padding: '8px',
+                          width: '100%',
+                          borderRadius: '8px',
+                          border: '1px solid #d1d5db',
+                          color: '#111827',
+                        }}
+                      />
+                    ) : (
+                      `৳ ${p.price}`
+                    )}
                   </td>
 
-                  <td
-                    style={{
-                      padding: '14px',
-                      color: '#2563eb',
-                    }}
-                  >
-                    {p.category?.name || 'No Category'}
+                  {/* Category */}
+                  <td style={{ padding: '14px' }}>
+                    {editingId === p._id ? (
+                      <select
+                        value={editCategory}
+                        onChange={(e) =>
+                          setEditCategory(e.target.value)
+                        }
+                        style={{
+                          padding: '8px',
+                          width: '100%',
+                          borderRadius: '8px',
+                          border: '1px solid #d1d5db',
+                          color: '#111827',
+                        }}
+                      >
+                        <option value="">
+                          Select Category
+                        </option>
+
+                        {categories.map((c: any) => (
+                          <option
+                            key={c._id}
+                            value={c._id}
+                          >
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      p.category?.name || 'No Category'
+                    )}
                   </td>
 
+                  {/* Actions */}
                   <td
                     style={{
                       padding: '14px',
+                      display: 'flex',
+                      gap: '10px',
                     }}
                   >
-                    <button
-                      onClick={() => deleteProduct(p._id)}
-                      disabled={deletingId === p._id}
-                      style={{
-                        padding: '8px 14px',
-                        border: 'none',
-                        borderRadius: '8px',
-                        background:
-                          deletingId === p._id
-                            ? '#fca5a5'
-                            : '#dc2626',
-                        color: '#ffffff',
-                        cursor:
-                          deletingId === p._id
-                            ? 'not-allowed'
-                            : 'pointer',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {deletingId === p._id
-                        ? 'Deleting...'
-                        : 'Delete'}
-                    </button>
+                    {editingId === p._id ? (
+                      <>
+                        <button
+                          onClick={updateProduct}
+                          style={{
+                            padding: '8px 14px',
+                            border: 'none',
+                            borderRadius: '8px',
+                            background: '#16a34a',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                          }}
+                        >
+                          Save
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            setEditingId('')
+                          }
+                          style={{
+                            padding: '8px 14px',
+                            border: 'none',
+                            borderRadius: '8px',
+                            background: '#6b7280',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => startEdit(p)}
+                          style={{
+                            padding: '8px 14px',
+                            border: 'none',
+                            borderRadius: '8px',
+                            background: '#2563eb',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            deleteProduct(p._id)
+                          }
+                          disabled={deletingId === p._id}
+                          style={{
+                            padding: '8px 14px',
+                            border: 'none',
+                            borderRadius: '8px',
+                            background:
+                              deletingId === p._id
+                                ? '#fca5a5'
+                                : '#dc2626',
+                            color: '#ffffff',
+                            cursor:
+                              deletingId === p._id
+                                ? 'not-allowed'
+                                : 'pointer',
+                            fontWeight: 600,
+                          }}
+                        >
+                          {deletingId === p._id
+                            ? 'Deleting...'
+                            : 'Delete'}
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))
