@@ -70,13 +70,14 @@ const styles: any = {
     backgroundColor: '#f3f4f6',
     minHeight: '100vh',
     fontFamily: 'Arial',
-    boxShadow: 'none',
+    color: '#000', // ✅ সব লেখা কালো
   },
 
   title: {
     fontSize: '24px',
     fontWeight: 'bold',
     marginBottom: '20px',
+    color: '#000',
   },
 
   card: {
@@ -86,6 +87,7 @@ const styles: any = {
     borderRadius: '0px',
     border: '1px solid #ddd',
     boxShadow: 'none',
+    color: '#000',
   },
 
   row: {
@@ -115,5 +117,6 @@ const styles: any = {
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
+    color: '#000',
   },
 };
