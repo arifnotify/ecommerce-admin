@@ -11,59 +11,108 @@ export default function OrdersPage() {
     api
       .get('/orders')
       .then((res) => setOrders(res.data))
-      .catch((err) => console.log(err))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen text-gray-500">
-        Loading orders...
+      <div style={styles.center}>
+        Loading...
       </div>
     );
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">📦 Orders Dashboard</h1>
+    <div style={styles.page}>
+      <h1 style={styles.title}>Orders Dashboard</h1>
 
-      <div className="grid gap-4">
-        {orders.map((o: any) => (
-          <div
-            key={o._id}
-            className="bg-white shadow-md rounded-xl p-5 border border-gray-200 hover:shadow-lg transition"
-          >
-            <div className="flex justify-between items-center">
-              <h2 className="font-semibold text-lg">
-                Order ID: <span className="text-gray-500">{o._id}</span>
-              </h2>
-
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  o.status === 'pending'
-                    ? 'bg-yellow-100 text-yellow-700'
-                    : o.status === 'delivered'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-blue-100 text-blue-700'
-                }`}
-              >
-                {o.status}
-              </span>
-            </div>
-
-            <div className="mt-3 text-gray-700">
-              <p>
-                💰 Total Amount:{' '}
-                <span className="font-semibold">${o.totalAmount}</span>
-              </p>
-
-              <p className="text-sm text-gray-500 mt-1">
-                📍 Address: {o.address}
-              </p>
-            </div>
+      {orders.map((o) => (
+        <div key={o._id} style={styles.card}>
+          
+          <div style={styles.row}>
+            <span style={styles.label}>Order ID:</span>
+            <span>{o._id}</span>
           </div>
-        ))}
-      </div>
+
+          <div style={styles.row}>
+            <span style={styles.label}>Total:</span>
+            <span>${o.totalAmount}</span>
+          </div>
+
+          <div style={styles.row}>
+            <span style={styles.label}>Address:</span>
+            <span>{o.address}</span>
+          </div>
+
+          <div style={styles.statusRow}>
+            <span
+              style={{
+                ...styles.status,
+                backgroundColor:
+                  o.status === 'pending'
+                    ? '#facc15'
+                    : o.status === 'delivered'
+                    ? '#22c55e'
+                    : '#3b82f6',
+              }}
+            >
+              {o.status}
+            </span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
+
+const styles: any = {
+  page: {
+    padding: '20px',
+    backgroundColor: '#f3f4f6',
+    minHeight: '100vh',
+    fontFamily: 'Arial',
+  },
+
+  title: {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    marginBottom: '20px',
+  },
+
+  card: {
+    backgroundColor: '#ffffff',
+    padding: '15px',
+    marginBottom: '15px',
+    borderRadius: '8px',
+    border: '1px solid #ddd',
+  },
+
+  row: {
+    marginBottom: '8px',
+  },
+
+  label: {
+    fontWeight: 'bold',
+    marginRight: '5px',
+  },
+
+  statusRow: {
+    marginTop: '10px',
+  },
+
+  status: {
+    color: '#000',
+    padding: '5px 10px',
+    borderRadius: '5px',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    display: 'inline-block',
+  },
+
+  center: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+  },
+};
