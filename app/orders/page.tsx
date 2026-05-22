@@ -28,7 +28,6 @@ export default function OrdersPage() {
 
       {orders.map((o) => (
         <div key={o._id} style={styles.card}>
-          
           <div style={styles.row}>
             <span style={styles.label}>Order ID:</span>
             <span>{o._id}</span>
@@ -71,6 +70,7 @@ const styles: any = {
     backgroundColor: '#f3f4f6',
     minHeight: '100vh',
     fontFamily: 'Arial',
+    boxShadow: 'none',
   },
 
   title: {
@@ -83,8 +83,9 @@ const styles: any = {
     backgroundColor: '#ffffff',
     padding: '15px',
     marginBottom: '15px',
-    borderRadius: '8px',
+    borderRadius: '0px',
     border: '1px solid #ddd',
+    boxShadow: 'none',
   },
 
   row: {
@@ -103,7 +104,7 @@ const styles: any = {
   status: {
     color: '#000',
     padding: '5px 10px',
-    borderRadius: '5px',
+    borderRadius: '0px',
     fontSize: '12px',
     fontWeight: 'bold',
     display: 'inline-block',
